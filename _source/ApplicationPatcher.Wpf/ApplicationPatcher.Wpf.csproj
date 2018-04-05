@@ -70,12 +70,21 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationPatcherWpfNinjectModule.cs" />
+    <Compile Include="Patchers\IViewModelPartPatcher.cs" />
+    <Compile Include="Patchers\ViewModelPatcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ApplicationPatcher.Wpf.Types\ApplicationPatcher.Wpf.Types.csproj">
+      <Project>{F4880B13-C43E-470D-9A6E-09749F90F396}</Project>
+      <Name>ApplicationPatcher.Wpf.Types</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

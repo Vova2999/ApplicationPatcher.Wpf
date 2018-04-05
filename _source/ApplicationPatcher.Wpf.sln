@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationPatcher.Wpf", "ApplicationPatcher.Wpf\ApplicationPatcher.Wpf.csproj", "{46193347-F4E8-4F28-85BF-3E11C544E4F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationPatcher.Wpf.Types", "ApplicationPatcher.Wpf.Types\ApplicationPatcher.Wpf.Types.csproj", "{F4880B13-C43E-470D-9A6E-09749F90F396}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{46193347-F4E8-4F28-85BF-3E11C544E4F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46193347-F4E8-4F28-85BF-3E11C544E4F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46193347-F4E8-4F28-85BF-3E11C544E4F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4880B13-C43E-470D-9A6E-09749F90F396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4880B13-C43E-470D-9A6E-09749F90F396}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4880B13-C43E-470D-9A6E-09749F90F396}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4880B13-C43E-470D-9A6E-09749F90F396}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
