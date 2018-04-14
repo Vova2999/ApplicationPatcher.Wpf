@@ -138,7 +138,7 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 
 			var setMethodFromViewModelBase = new GenericInstanceMethod(GetSetMethodFromViewModelBase(viewModelBase.MonoCecilType));
 			setMethodFromViewModelBase.GenericArguments.Add(property.PropertyType);
-			var setMethodInViewModelBaseWithGenericParameter = assembly.MonoCecilAssembly.MainModule.ImportReference(setMethodFromViewModelBase);
+			var setMethodInViewModelBaseWithGenericParameter = assembly.MainMonoCecilAssembly.MainModule.ImportReference(setMethodFromViewModelBase);
 
 			log.Info("Generate set method body...");
 			var setMethodBodyInstructions = propertySetMethod.Body.Instructions;
