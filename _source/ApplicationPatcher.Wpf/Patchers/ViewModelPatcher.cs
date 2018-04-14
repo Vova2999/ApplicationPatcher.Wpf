@@ -5,9 +5,10 @@ using ApplicationPatcher.Core.Helpers;
 using ApplicationPatcher.Core.Types.Common;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModels;
 using ApplicationPatcher.Wpf.Types.Enums;
-using GalaSoft.MvvmLight;
+using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers {
+	[UsedImplicitly]
 	public class ViewModelPatcher : IPatcher {
 		private readonly IViewModelPartPatcher[] viewModelPartPatchers;
 		private readonly Log log;
@@ -20,16 +21,15 @@ namespace ApplicationPatcher.Wpf.Patchers {
 		[DoNotAddLogOffset]
 		public void Patch(CommonAssembly assembly) {
 			log.Info("Patching view models...");
+			var viewModelBase = assembly.GetCommonType("GalaSoft.MvvmLight.ViewModelBase").Load();
 
-			var viewModels = assembly.GetInheritanceCommonTypes(typeof(ViewModelBase)).WhereFrom(assembly).ToArray();
+			var viewModels = assembly.GetInheritanceCommonTypes(viewModelBase).WhereFrom(assembly).ToArray();
 			if (!viewModels.Any()) {
 				log.Info("Not found view models");
 				return;
 			}
 
 			log.Debug("View models found:", viewModels.Select(viewModel => viewModel.FullName));
-			var viewModelBase = assembly.GetCommonType(typeof(ViewModelBase)).Load();
-
 			foreach (var viewModel in viewModels) {
 				log.Info($"Patching {viewModel.FullName}...");
 				viewModel.Load();

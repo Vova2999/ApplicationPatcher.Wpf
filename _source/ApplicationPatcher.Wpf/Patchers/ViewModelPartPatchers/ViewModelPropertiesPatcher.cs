@@ -8,10 +8,12 @@ using ApplicationPatcher.Core.Types.Common;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Types.Attributes.Properties;
 using ApplicationPatcher.Wpf.Types.Enums;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
+	[UsedImplicitly]
 	public class ViewModelPropertiesPatcher : IViewModelPartPatcher {
 		private readonly Log log;
 
@@ -45,12 +47,14 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			switch (viewModelPatchingType) {
 				case ViewModelPatchingType.All:
 					return viewModel.Properties
+						.Select(property => property.Load())
 						.Where(property =>
 							property.NotContainsAttribute(typeof(NotPatchingPropertyAttribute)) &&
 							(property.ContainsAttribute(typeof(PatchingPropertyAttribute)) || property.IsNotInheritedFrom(typeof(ICommand))))
 						.ToArray();
 				case ViewModelPatchingType.Selectively:
 					return viewModel.Properties
+						.Select(property => property.Load())
 						.Where(property => property.ContainsAttribute(typeof(PatchingPropertyAttribute)))
 						.ToArray();
 				default:
