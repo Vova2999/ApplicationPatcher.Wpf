@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Core.Helpers;
+using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Types.Common;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Types.Attributes.Properties;
@@ -15,13 +15,12 @@ using Mono.Cecil.Cil;
 namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 	[UsedImplicitly]
 	public class ViewModelPropertiesPatcher : IViewModelPartPatcher {
-		private readonly Log log;
+		private readonly ILog log;
 
 		public ViewModelPropertiesPatcher() {
 			log = Log.For(this);
 		}
 
-		[DoNotAddLogOffset]
 		public void Patch(CommonAssembly assembly, CommonType viewModelBase, CommonType viewModel, ViewModelPatchingType viewModelPatchingType) {
 			log.Info($"Patching {viewModel.FullName} properties...");
 
@@ -42,7 +41,6 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			log.Info($"Properties {viewModel.FullName} was patched");
 		}
 
-		[DoNotAddLogOffset]
 		private CommonProperty[] GetCommonProperties(CommonType viewModel, ViewModelPatchingType viewModelPatchingType) {
 			switch (viewModelPatchingType) {
 				case ViewModelPatchingType.All:
@@ -63,6 +61,7 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			}
 		}
 
+		[AddLogOffset]
 		private void PatchProprty(CommonAssembly assembly, CommonType viewModelBase, CommonType viewModel, CommonProperty property) {
 			CheckProperty(property);
 
@@ -72,21 +71,20 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			var backgroundFieldName = $"{char.ToLower(propertyName.First())}{propertyName.Substring(1)}";
 			log.Debug($"Background field name: {backgroundFieldName}");
 
-			var backgroundField = viewModel.Fields.FirstOrDefault(field => field.Name == backgroundFieldName)?.MonoCecilField;
+			var backgroundField = viewModel.Fields.FirstOrDefault(field => field.Name == backgroundFieldName)?.MonoCecil;
 
 			if (backgroundField == null) {
-				backgroundField = new FieldDefinition(backgroundFieldName, FieldAttributes.Private, property.MonoCecilProperty.PropertyType);
-				viewModel.MonoCecilType.Fields.Add(backgroundField);
+				backgroundField = new FieldDefinition(backgroundFieldName, FieldAttributes.Private, property.MonoCecil.PropertyType);
+				viewModel.MonoCecil.Fields.Add(backgroundField);
 				log.Debug("Background field was created");
 			}
 			else
 				log.Debug("Background field was connected");
 
-			GenerateGetMethodBody(property.MonoCecilProperty, backgroundField);
-			GenerateSetMethodBody(assembly, viewModelBase, property.MonoCecilProperty, propertyName, backgroundField);
+			GenerateGetMethodBody(property.MonoCecil, backgroundField);
+			GenerateSetMethodBody(assembly, viewModelBase, property.MonoCecil, propertyName, backgroundField);
 		}
 
-		[DoNotAddLogOffset]
 		private void CheckProperty(CommonProperty property) {
 			if (property.IsInheritedFrom(typeof(ICommand))) {
 				const string errorMessage = "Patching property type cannot be inherited from ICommand";
@@ -104,7 +102,6 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			}
 		}
 
-		[DoNotAddLogOffset]
 		private void GenerateGetMethodBody(PropertyDefinition property, FieldDefinition backgroundField) {
 			log.Info("Generate get method body...");
 			var propertyGetMethod = property.GetMethod;
@@ -125,7 +122,6 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			log.Info("Get method body was generated");
 		}
 
-		[DoNotAddLogOffset]
 		private void GenerateSetMethodBody(CommonAssembly assembly, CommonType viewModelBase, PropertyDefinition property, string propertyName, FieldDefinition backgroundField) {
 			log.Info("Generate method reference on Set method in ViewModelBase...");
 			var propertySetMethod = property.SetMethod;
@@ -136,9 +132,9 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 				throw new PropertyPatchingException(errorMessage, property.FullName);
 			}
 
-			var setMethodFromViewModelBase = new GenericInstanceMethod(GetSetMethodFromViewModelBase(viewModelBase.MonoCecilType));
+			var setMethodFromViewModelBase = new GenericInstanceMethod(GetSetMethodFromViewModelBase(viewModelBase.MonoCecil));
 			setMethodFromViewModelBase.GenericArguments.Add(property.PropertyType);
-			var setMethodInViewModelBaseWithGenericParameter = assembly.MainMonoCecilAssembly.MainModule.ImportReference(setMethodFromViewModelBase);
+			var setMethodInViewModelBaseWithGenericParameter = assembly.MonoCecil.MainModule.ImportReference(setMethodFromViewModelBase);
 
 			log.Info("Generate set method body...");
 			var setMethodBodyInstructions = propertySetMethod.Body.Instructions;
@@ -157,7 +153,6 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			log.Info("Set method body was generated");
 		}
 
-		[DoNotAddLogOffset]
 		private static void RemoveCompilerGeneratedAttribute(MethodDefinition method) {
 			var compilerGeneratedAttribute = method.CustomAttributes
 				.FirstOrDefault(attribute => attribute.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);

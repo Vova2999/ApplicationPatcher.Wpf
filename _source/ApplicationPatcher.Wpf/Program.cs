@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Linq;
 using ApplicationPatcher.Core;
-using ApplicationPatcher.Core.Helpers;
+using ApplicationPatcher.Core.Logs;
 using Ninject;
 
 namespace ApplicationPatcher.Wpf {
 	public static class Program {
-		private static readonly Log log = Log.For(typeof(Program));
+		private static readonly ILog log = Log.For(typeof(Program));
 
-		[DoNotAddLogOffset]
 		public static void Main(string[] args) {
 			try {
 				Run(args.FirstOrDefault());
@@ -19,7 +18,6 @@ namespace ApplicationPatcher.Wpf {
 			}
 		}
 
-		[DoNotAddLogOffset]
 		private static void Run(string applicationPath) {
 			var container = new StandardKernel(new ApplicationPatcherWpfNinjectModule());
 			container.Get<ApplicationPatcherProcessor>().PatchApplication(applicationPath);
