@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ApplicationPatcher.Wpf.Types.Attributes.Properties {
+namespace ApplicationPatcher.Wpf.Types.Attributes {
 	[AttributeUsage(AttributeTargets.Property)]
 	public class PatchingPropertyAttribute : Attribute {
 	}

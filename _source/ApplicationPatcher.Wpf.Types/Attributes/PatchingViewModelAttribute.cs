@@ -1,7 +1,7 @@
 ﻿using System;
 using ApplicationPatcher.Wpf.Types.Enums;
 
-namespace ApplicationPatcher.Wpf.Types.Attributes.ViewModels {
+namespace ApplicationPatcher.Wpf.Types.Attributes {
 	[AttributeUsage(AttributeTargets.Class)]
 	public class PatchingViewModelAttribute : Attribute {
 		public readonly ViewModelPatchingType ViewModelPatchingType;

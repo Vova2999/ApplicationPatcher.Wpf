@@ -4,7 +4,7 @@ using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
 using ApplicationPatcher.Core.Types.Common;
-using ApplicationPatcher.Wpf.Types.Attributes.ViewModels;
+using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
 using JetBrains.Annotations;
 

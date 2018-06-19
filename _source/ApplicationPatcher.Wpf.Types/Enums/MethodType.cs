@@ -1,5 +1,5 @@
 ﻿namespace ApplicationPatcher.Wpf.Types.Enums {
-	public enum CommandMethodType {
+	public enum MethodType {
 		Execute,
 		CanExecute
 	}

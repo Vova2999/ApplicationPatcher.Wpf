@@ -35,14 +35,17 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\Commands\Methods\NotPatchingToCommandAttribute.cs" />
-    <Compile Include="Attributes\Commands\Methods\PatchingToCommandAttribute.cs" />
-    <Compile Include="Attributes\Commands\Properties\CombineWithMethodAttribute.cs" />
-    <Compile Include="Attributes\Commands\Properties\NotCombineWithMethodAttribute.cs" />
-    <Compile Include="Attributes\Properties\NotPatchingPropertyAttribute.cs" />
-    <Compile Include="Attributes\Properties\PatchingPropertyAttribute.cs" />
-    <Compile Include="Attributes\ViewModels\PatchingViewModelAttribute.cs" />
-    <Compile Include="Enums\CommandMethodType.cs" />
+    <Compile Include="Attributes\ConnectFieldToPropertyAttribute.cs" />
+    <Compile Include="Attributes\ConnectMethodToMethodAttribute.cs" />
+    <Compile Include="Attributes\ConnectMethodToPropertyAttribute.cs" />
+    <Compile Include="Attributes\ConnectPropertyToFieldAttribute.cs" />
+    <Compile Include="Attributes\ConnectPropertyToMethodAttribute.cs" />
+    <Compile Include="Attributes\NotPatchingCommandAttribute.cs" />
+    <Compile Include="Attributes\NotPatchingPropertyAttribute.cs" />
+    <Compile Include="Attributes\PatchingCommandAttribute.cs" />
+    <Compile Include="Attributes\PatchingPropertyAttribute.cs" />
+    <Compile Include="Attributes\PatchingViewModelAttribute.cs" />
+    <Compile Include="Enums\MethodType.cs" />
     <Compile Include="Enums\ViewModelPatchingType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

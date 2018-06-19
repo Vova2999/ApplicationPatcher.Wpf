@@ -6,7 +6,7 @@ using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Types.Common;
 using ApplicationPatcher.Wpf.Exceptions;
-using ApplicationPatcher.Wpf.Types.Attributes.Properties;
+using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
 using JetBrains.Annotations;
 using Mono.Cecil;
