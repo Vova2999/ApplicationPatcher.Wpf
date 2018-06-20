@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Types.Common;
@@ -14,20 +15,20 @@ using Mono.Cecil.Cil;
 
 namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 	[UsedImplicitly]
-	public class ViewModelPropertiesPatcher : IViewModelPartPatcher {
+	public class ViewModelPropertiesPatcher : ViewModelPartPatcher {
 		private readonly ILog log;
 
 		public ViewModelPropertiesPatcher() {
 			log = Log.For(this);
 		}
 
-		public void Patch(CommonAssembly assembly, CommonType viewModelBase, CommonType viewModel, ViewModelPatchingType viewModelPatchingType) {
+		public override PatchResult Patch(CommonAssembly assembly, CommonType viewModelBase, CommonType viewModel, ViewModelPatchingType viewModelPatchingType) {
 			log.Info($"Patching {viewModel.FullName} properties...");
 
 			var properties = GetCommonProperties(viewModel, viewModelPatchingType);
 			if (!properties.Any()) {
 				log.Info("Not found properties");
-				return;
+				return PatchResult.Continue;
 			}
 
 			log.Debug("Properties found:", properties.Select(property => property.FullName));
@@ -39,6 +40,7 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 			}
 
 			log.Info($"Properties {viewModel.FullName} was patched");
+			return PatchResult.Continue;
 		}
 
 		private CommonProperty[] GetCommonProperties(CommonType viewModel, ViewModelPatchingType viewModelPatchingType) {
