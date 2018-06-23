@@ -1,16 +1,15 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Wpf.Extensions;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules.Specific {
 	public class FirstUpperNameRules : SpecificNameRulesService {
-		public FirstUpperNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[A-Z]{1}[a-z\d]*)(_($|(?<LastWords>[a-z\d]+)))*") {
+		public FirstUpperNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[A-Z][a-z\d]*)(_(?<LastWords>[a-z\d]+))*_?") {
 		}
 
 		protected override string[] GetNameWordsFromMatch(Match match) {
-			return match.GetValues("FirstWord").Concat(match.GetValues("LastWords")).ToArray();
+			return match.GetValues("FirstWord").Concat(match.GetValues("LastWords")).Concat(match.GetValues("LastWord")).Where(word => !word.IsNullOrEmpty()).ToArray();
 		}
 
 		protected override string CompileNameWithoutPrefixAndSuffix(string[] nameWords) {

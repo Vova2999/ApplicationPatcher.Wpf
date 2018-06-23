@@ -5,11 +5,11 @@ using ApplicationPatcher.Wpf.Extensions;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules.Specific {
 	public class LowerCamelCaseNameRules : SpecificNameRulesService {
-		public LowerCamelCaseNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[a-z]{1}($|[a-z\d]+))(?<LastWords>[A-Z]{1}($|[a-z\d]+))*") {
+		public LowerCamelCaseNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[a-z][a-z\d]*)(?<MiddleWords>[A-Z][a-z\d]+)*(?<LastWord>[A-Z])?") {
 		}
 
 		protected override string[] GetNameWordsFromMatch(Match match) {
-			return match.GetValues("FirstWord").Concat(match.GetValues("LastWords")).ToArray();
+			return match.GetValues("FirstWord").Concat(match.GetValues("MiddleWords")).Concat(match.GetValues("LastWord")).ToArray();
 		}
 
 		protected override string CompileNameWithoutPrefixAndSuffix(string[] nameWords) {
