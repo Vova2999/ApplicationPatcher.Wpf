@@ -86,12 +86,12 @@
     <Compile Include="Services\ErrorsService.cs" />
     <Compile Include="Services\NameRules\NameRulesService.cs" />
     <Compile Include="Services\NameRules\SpecificNameRulesService.cs" />
-    <Compile Include="Factories\SpecificNameRulesServiceFactory.cs" />
     <Compile Include="Services\NameRules\Specific\AllLowerNameRules.cs" />
     <Compile Include="Services\NameRules\Specific\AllUpperNameRules.cs" />
     <Compile Include="Services\NameRules\Specific\FirstUpperNameRules.cs" />
     <Compile Include="Services\NameRules\Specific\LowerCamelCaseNameRules.cs" />
     <Compile Include="Services\NameRules\Specific\UpperCamelCaseNameRules.cs" />
+    <Compile Include="Services\NameRules\UseNameRulesFor.cs" />
     <Compile Include="Services\PropertyGrouper\PropertyGroup.cs" />
     <Compile Include="Services\PropertyGrouper\PropertyGrouperService.cs" />
   </ItemGroup>

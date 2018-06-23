@@ -4,14 +4,14 @@ using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Helpers;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.Common;
+using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers {
 	[UsedImplicitly]
-	public class ViewModelPatcher : LoadedAssemblyPatcher {
+	public class ViewModelPatcher : Patcher {
 		private readonly ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;
 		private readonly ViewModelPartPatcher[] viewModelPartPatchers;
 		private readonly ILog log;

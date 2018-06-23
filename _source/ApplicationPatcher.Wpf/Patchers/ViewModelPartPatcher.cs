@@ -1,6 +1,6 @@
 ﻿using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Logs;
-using ApplicationPatcher.Core.Types.Common;
+using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Types.Enums;
 
 namespace ApplicationPatcher.Wpf.Patchers {

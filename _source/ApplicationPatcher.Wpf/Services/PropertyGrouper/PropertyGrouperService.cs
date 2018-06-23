@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Core.Types.Base;
-using ApplicationPatcher.Core.Types.Common;
+using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.Interfaces;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;

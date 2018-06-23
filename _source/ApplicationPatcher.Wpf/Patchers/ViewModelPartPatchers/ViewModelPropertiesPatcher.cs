@@ -1,13 +1,7 @@
-﻿using System;
-using System.Linq;
-using ApplicationPatcher.Core;
-using ApplicationPatcher.Core.Extensions;
+﻿using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Logs;
-using ApplicationPatcher.Core.Types.Common;
-using ApplicationPatcher.Wpf.Exceptions;
-using ApplicationPatcher.Wpf.Services;
+using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Services.PropertyGrouper;
-using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
 using JetBrains.Annotations;
 

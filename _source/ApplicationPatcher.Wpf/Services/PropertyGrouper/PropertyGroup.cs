@@ -1,4 +1,4 @@
-﻿using ApplicationPatcher.Core.Types.Common;
+﻿using ApplicationPatcher.Core.Types.CommonMembers;
 
 namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 	public class PropertyGroup {

@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Helpers\NamesHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\NameRules\NameRulesServiceTests.cs" />
     <Compile Include="Services\NameRules\SpecificNameRulesServiceTestsBase.cs" />
     <Compile Include="Services\NameRules\Specific\AllLowerNameRulesTests.cs" />
     <Compile Include="Services\NameRules\Specific\AllUpperNameRulesTests.cs" />
