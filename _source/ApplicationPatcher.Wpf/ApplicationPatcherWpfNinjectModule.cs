@@ -1,4 +1,5 @@
-﻿using Ninject.Extensions.Conventions;
+﻿using ApplicationPatcher.Wpf.Configurations;
+using Ninject.Extensions.Conventions;
 using Ninject.Modules;
 
 namespace ApplicationPatcher.Wpf {
@@ -6,6 +7,7 @@ namespace ApplicationPatcher.Wpf {
 		public override void Load() {
 			Kernel.Bind(c => c.FromThisAssembly().SelectAllClasses().BindAllInterfaces().Configure(y => y.InSingletonScope()));
 			Kernel.Bind(c => c.FromThisAssembly().SelectAllClasses().BindAllBaseClasses().Configure(y => y.InSingletonScope()));
+			Kernel?.Rebind<ApplicationPatcherWpfConfiguration>().ToMethod(c => ApplicationPatcherWpfConfiguration.ReadConfiguration());
 		}
 	}
 }
