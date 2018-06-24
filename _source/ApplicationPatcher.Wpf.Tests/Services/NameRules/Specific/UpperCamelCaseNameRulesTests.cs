@@ -1,16 +1,11 @@
 ﻿using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Wpf.Configurations;
-using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Services.NameRules.Specific;
 using NUnit.Framework;
 
 namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 	[TestFixture]
 	public class UpperCamelCaseNameRulesTests : SpecificNameRulesServiceTestsBase {
-		protected override NameRulesType NameRulesType => NameRulesType.UpperCamelCase;
-
-		protected override SpecificNameRulesService CreateSpecificNameRulesService(string prefix, string suffix) {
-			return new UpperCamelCaseNameRules(prefix, suffix);
+		public UpperCamelCaseNameRulesTests() : base(new UpperCamelCaseNameRules()) {
 		}
 
 		[Test]

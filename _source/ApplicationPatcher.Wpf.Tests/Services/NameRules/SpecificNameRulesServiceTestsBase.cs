@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Tests.Helpers;
 using FluentAssertions;
@@ -10,14 +9,16 @@ using NUnit.Framework;
 namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 	[TestFixture]
 	public abstract class SpecificNameRulesServiceTestsBase {
-		protected Random Random;
-		protected abstract NameRulesType NameRulesType { get; }
+		private Random random;
+		private readonly SpecificNameRulesService specificNameRulesService;
 
-		protected abstract SpecificNameRulesService CreateSpecificNameRulesService(string prefix, string suffix);
+		protected SpecificNameRulesServiceTestsBase(SpecificNameRulesService specificNameRulesService) {
+			this.specificNameRulesService = specificNameRulesService;
+		}
 
 		[SetUp]
 		public void SpecificNameRulesServiceTestsBaseSetUp() {
-			Random = new Random(1);
+			random = new Random(1);
 		}
 
 		[Test]
@@ -45,21 +46,18 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		}
 
 		private void CheckValidNames(string prefix, string suffix) {
-			var specificNameRulesService = CreateSpecificNameRulesService(prefix, suffix);
-			foreach (var validName in NamesHelper.GetValidNames(Random, new Configurations.NameRules { Prefix = prefix, Suffix = suffix, Type = NameRulesType })) {
-				specificNameRulesService.IsNameValid(validName.Name).Should().Be(true, $"Name '{validName}' is valid");
-				specificNameRulesService.GetNameWords(validName.Name).SequenceEqual(validName.Words).Should().Be(true);
+			foreach (var validName in NamesHelper.GetValidNames(random, new Configurations.NameRules { Prefix = prefix, Suffix = suffix, Type = specificNameRulesService.NameRulesType })) {
+				specificNameRulesService.IsNameValid(validName.Name, prefix, suffix).Should().Be(true, $"Name '{validName}' is valid");
+				specificNameRulesService.GetNameWords(validName.Name, prefix, suffix).SequenceEqual(validName.Words).Should().Be(true);
 			}
 		}
 
 		protected void CheckValidName(string validName, string prefix, string suffix) {
-			var specificNameRulesService = CreateSpecificNameRulesService(prefix, suffix);
-			specificNameRulesService.IsNameValid(validName).Should().Be(true, $"Name '{validName}' is valid");
+			specificNameRulesService.IsNameValid(validName, prefix, suffix).Should().Be(true, $"Name '{validName}' is valid");
 		}
 
 		protected void CheckInvalidName(string invalidName, string prefix, string suffix) {
-			var specificNameRulesService = CreateSpecificNameRulesService(prefix, suffix);
-			specificNameRulesService.IsNameValid(invalidName).Should().Be(false, $"Name '{invalidName}' is invalid");
+			specificNameRulesService.IsNameValid(invalidName, prefix, suffix).Should().Be(false, $"Name '{invalidName}' is invalid");
 		}
 	}
 }

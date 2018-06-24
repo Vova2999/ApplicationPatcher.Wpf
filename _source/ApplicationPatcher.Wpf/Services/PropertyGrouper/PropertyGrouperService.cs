@@ -5,7 +5,6 @@ using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Core.Types.Interfaces;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
-using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;

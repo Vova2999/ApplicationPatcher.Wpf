@@ -1,40 +1,38 @@
 ﻿using System;
-using System.Text;
 using System.Text.RegularExpressions;
+using ApplicationPatcher.Core.Extensions;
+using ApplicationPatcher.Wpf.Configurations;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules {
 	public abstract class SpecificNameRulesService {
-		private readonly string prefix;
-		private readonly string suffix;
-		private readonly string pattern;
+		public abstract NameRulesType NameRulesType { get; }
+		private readonly string shortPattern;
 
-		protected SpecificNameRulesService(string prefix, string suffix, string shortPattern) {
-			this.prefix = prefix;
-			this.suffix = suffix;
-
-			pattern = $"^{prefix ?? string.Empty}{shortPattern}{suffix ?? string.Empty}$";
+		protected SpecificNameRulesService(string shortPattern) {
+			this.shortPattern = shortPattern;
 		}
 
-		public bool IsNameValid(string name) {
-			return Regex.IsMatch(name, pattern);
+		public bool IsNameValid(string name, string prefix, string suffix) {
+			return Regex.IsMatch(name, GetFullPattern(prefix, suffix));
 		}
 
-		public string[] GetNameWords(string name) {
-			var match = Regex.Match(name, pattern);
-			return match.Success ? GetNameWordsFromMatch(match) : throw new InvalidOperationException($"Name '{name}' is invalid by pattern '{pattern}'");
+		public string[] GetNameWords(string name, string prefix, string suffix) {
+			var match = Regex.Match(name, GetFullPattern(prefix, suffix));
+			return match.Success
+				? GetNameWordsFromMatch(match)
+				: throw new InvalidOperationException($"Name '{name}' is invalid by NameRulesType '{NameRulesType}' with prefix '{prefix}' and suffix '{suffix}'");
 		}
 
 		protected abstract string[] GetNameWordsFromMatch(Match match);
 
-		public string CompileName(string[] nameWords) {
-			var stringBuilder = new StringBuilder();
-			stringBuilder.Append(prefix);
-			stringBuilder.Append(CompileNameWithoutPrefixAndSuffix(nameWords));
-			stringBuilder.Append(suffix);
-
-			return stringBuilder.ToString();
+		public string CompileName(string[] nameWords, string prefix, string suffix) {
+			return $"{prefix.EmptyIfNull()}{CompileNameWithoutPrefixAndSuffix(nameWords)}{suffix.EmptyIfNull()}";
 		}
 
 		protected abstract string CompileNameWithoutPrefixAndSuffix(string[] nameWords);
+
+		private string GetFullPattern(string prefix, string suffix) {
+			return $"^{prefix.EmptyIfNull()}{shortPattern}{suffix.EmptyIfNull()}$";
+		}
 	}
 }

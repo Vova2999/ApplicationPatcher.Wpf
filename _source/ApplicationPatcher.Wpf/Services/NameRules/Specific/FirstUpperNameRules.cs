@@ -1,11 +1,14 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using ApplicationPatcher.Core.Extensions;
+using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Extensions;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules.Specific {
 	public class FirstUpperNameRules : SpecificNameRulesService {
-		public FirstUpperNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[A-Z][a-z\d]*)(_(?<LastWords>[a-z\d]+))*_?") {
+		public override NameRulesType NameRulesType => NameRulesType.First_upper;
+
+		public FirstUpperNameRules() : base(@"(?<FirstWord>[A-Z][a-z\d]*)(_(?<LastWords>[a-z\d]+))*_?") {
 		}
 
 		protected override string[] GetNameWordsFromMatch(Match match) {

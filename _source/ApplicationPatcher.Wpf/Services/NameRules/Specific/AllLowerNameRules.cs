@@ -1,11 +1,14 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using ApplicationPatcher.Core.Extensions;
+using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Extensions;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules.Specific {
 	public class AllLowerNameRules : SpecificNameRulesService {
-		public AllLowerNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[a-z][a-z\d]*)(_(?<LastWords>[a-z\d]+))*_?") {
+		public override NameRulesType NameRulesType => NameRulesType.all_lower;
+
+		public AllLowerNameRules() : base(@"(?<FirstWord>[a-z][a-z\d]*)(_(?<LastWords>[a-z\d]+))*_?") {
 		}
 
 		protected override string[] GetNameWordsFromMatch(Match match) {

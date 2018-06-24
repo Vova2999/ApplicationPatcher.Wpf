@@ -3,6 +3,7 @@ using System.Linq;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Services.NameRules;
+using ApplicationPatcher.Wpf.Services.NameRules.Specific;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -13,14 +14,25 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 
 		[OneTimeSetUp]
 		public void OneTimeSetUp() {
-			nameRulesService = new NameRulesService(new ApplicationPatcherWpfConfiguration {
+			var applicationPatcherWpfConfiguration = new ApplicationPatcherWpfConfiguration {
 				FieldNameRules = new Configurations.NameRules { Type = NameRulesType.lowerCamelCase },
 				PropertyNameRules = new Configurations.NameRules { Type = NameRulesType.UpperCamelCase },
 				CommandFieldNameRules = new Configurations.NameRules { Suffix = "Command", Type = NameRulesType.lowerCamelCase },
 				CommandPropertyNameRules = new Configurations.NameRules { Suffix = "Command", Type = NameRulesType.UpperCamelCase },
 				CommandExecuteMethodNameRules = new Configurations.NameRules { Prefix = "Execute", Suffix = "Method", Type = NameRulesType.UpperCamelCase },
 				CommandCanExecuteMethodNameRules = new Configurations.NameRules { Prefix = "CanExecute", Suffix = "Method", Type = NameRulesType.UpperCamelCase }
-			});
+			};
+
+			var specificNameRulesServices =
+				new SpecificNameRulesService[] {
+					new AllLowerNameRules(),
+					new AllUpperNameRules(),
+					new FirstUpperNameRules(),
+					new LowerCamelCaseNameRules(),
+					new UpperCamelCaseNameRules()
+				};
+
+			nameRulesService = new NameRulesService(applicationPatcherWpfConfiguration, specificNameRulesServices);
 		}
 
 		[Test]

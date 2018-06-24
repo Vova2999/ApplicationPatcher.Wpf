@@ -1,16 +1,11 @@
 ﻿using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Wpf.Configurations;
-using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Services.NameRules.Specific;
 using NUnit.Framework;
 
 namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 	[TestFixture]
 	public class AllUpperNameRulesTests : SpecificNameRulesServiceTestsBase {
-		protected override NameRulesType NameRulesType => NameRulesType.ALL_UPPER;
-
-		protected override SpecificNameRulesService CreateSpecificNameRulesService(string prefix, string suffix) {
-			return new AllUpperNameRules(prefix, suffix);
+		public AllUpperNameRulesTests() : base(new AllUpperNameRules()) {
 		}
 
 		[Test]

@@ -1,57 +1,55 @@
 ﻿using System;
+using System.Linq;
 using ApplicationPatcher.Wpf.Configurations;
-using ApplicationPatcher.Wpf.Services.NameRules.Specific;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules {
 	public class NameRulesService {
 		private readonly ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;
+		private readonly SpecificNameRulesService[] specificNameRulesServices;
 
-		public NameRulesService(ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration) {
+		public NameRulesService(ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration, SpecificNameRulesService[] specificNameRulesServices) {
 			this.applicationPatcherWpfConfiguration = applicationPatcherWpfConfiguration;
+			this.specificNameRulesServices = specificNameRulesServices;
 		}
 
 		public bool IsNameValid(string name, UseNameRulesFor useNameRulesFor) {
-			return CreateSpecificNameRulesService(useNameRulesFor).IsNameValid(name);
+			var nameRules = GetNameRules(useNameRulesFor);
+			return GetSpecificNameRulesService(nameRules.Type).IsNameValid(name, nameRules.Prefix, nameRules.Suffix);
 		}
 
 		public string ConvertName(string name, UseNameRulesFor from, UseNameRulesFor to) {
-			return CreateSpecificNameRulesService(to).CompileName(CreateSpecificNameRulesService(from).GetNameWords(name));
+			var fromNameRules = GetNameRules(from);
+			var toNameRules = GetNameRules(to);
+
+			var fromSpecificNameRulesService = GetSpecificNameRulesService(fromNameRules.Type);
+			var toSpecificNameRulesService = GetSpecificNameRulesService(toNameRules.Type);
+
+			var nameWords = fromSpecificNameRulesService.GetNameWords(name, fromNameRules.Prefix, fromNameRules.Suffix);
+			return toSpecificNameRulesService.CompileName(nameWords, toNameRules.Prefix, toNameRules.Suffix);
 		}
 
-		private SpecificNameRulesService CreateSpecificNameRulesService(UseNameRulesFor useNameRulesFor) {
+		private Configurations.NameRules GetNameRules(UseNameRulesFor useNameRulesFor) {
 			switch (useNameRulesFor) {
 				case UseNameRulesFor.Field:
-					return CreateSpecificNameRulesService(applicationPatcherWpfConfiguration.FieldNameRules);
+					return applicationPatcherWpfConfiguration.FieldNameRules;
 				case UseNameRulesFor.Property:
-					return CreateSpecificNameRulesService(applicationPatcherWpfConfiguration.PropertyNameRules);
+					return applicationPatcherWpfConfiguration.PropertyNameRules;
 				case UseNameRulesFor.CommandField:
-					return CreateSpecificNameRulesService(applicationPatcherWpfConfiguration.CommandFieldNameRules);
+					return applicationPatcherWpfConfiguration.CommandFieldNameRules;
 				case UseNameRulesFor.CommandProperty:
-					return CreateSpecificNameRulesService(applicationPatcherWpfConfiguration.CommandPropertyNameRules);
+					return applicationPatcherWpfConfiguration.CommandPropertyNameRules;
 				case UseNameRulesFor.CommandExecuteMethod:
-					return CreateSpecificNameRulesService(applicationPatcherWpfConfiguration.CommandExecuteMethodNameRules);
+					return applicationPatcherWpfConfiguration.CommandExecuteMethodNameRules;
 				case UseNameRulesFor.CommandCanExecuteMethod:
-					return CreateSpecificNameRulesService(applicationPatcherWpfConfiguration.CommandCanExecuteMethodNameRules);
+					return applicationPatcherWpfConfiguration.CommandCanExecuteMethodNameRules;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(useNameRulesFor), useNameRulesFor, null);
 			}
 		}
 
-		private SpecificNameRulesService CreateSpecificNameRulesService(Configurations.NameRules nameRules) {
-			switch (nameRules.Type) {
-				case NameRulesType.all_lower:
-					return new AllLowerNameRules(nameRules.Prefix, nameRules.Suffix);
-				case NameRulesType.ALL_UPPER:
-					return new AllUpperNameRules(nameRules.Prefix, nameRules.Suffix);
-				case NameRulesType.First_upper:
-					return new FirstUpperNameRules(nameRules.Prefix, nameRules.Suffix);
-				case NameRulesType.lowerCamelCase:
-					return new LowerCamelCaseNameRules(nameRules.Prefix, nameRules.Suffix);
-				case NameRulesType.UpperCamelCase:
-					return new UpperCamelCaseNameRules(nameRules.Prefix, nameRules.Suffix);
-				default:
-					throw new ArgumentOutOfRangeException(nameof(nameRules.Type), nameRules.Type, null);
-			}
+		private SpecificNameRulesService GetSpecificNameRulesService(NameRulesType nameRulesType) {
+			return specificNameRulesServices.FirstOrDefault(service => service.NameRulesType == nameRulesType)
+				?? throw new ArgumentOutOfRangeException(nameof(nameRulesType), nameRulesType, "Not implement name rules");
 		}
 	}
 }

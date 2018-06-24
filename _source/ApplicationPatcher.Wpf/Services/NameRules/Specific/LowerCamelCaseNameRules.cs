@@ -1,11 +1,14 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using ApplicationPatcher.Core.Extensions;
+using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Extensions;
 
 namespace ApplicationPatcher.Wpf.Services.NameRules.Specific {
 	public class LowerCamelCaseNameRules : SpecificNameRulesService {
-		public LowerCamelCaseNameRules(string prefix, string suffix) : base(prefix, suffix, @"(?<FirstWord>[a-z][a-z\d]*)(?<MiddleWords>[A-Z][a-z\d]+)*(?<LastWord>[A-Z])?") {
+		public override NameRulesType NameRulesType => NameRulesType.lowerCamelCase;
+
+		public LowerCamelCaseNameRules() : base(@"(?<FirstWord>[a-z][a-z\d]*)(?<MiddleWords>[A-Z][a-z\d]+)*(?<LastWord>[A-Z])?") {
 		}
 
 		protected override string[] GetNameWordsFromMatch(Match match) {

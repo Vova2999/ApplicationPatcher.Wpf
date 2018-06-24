@@ -3,6 +3,7 @@ using ApplicationPatcher.Tests;
 using ApplicationPatcher.Tests.FakeTypes;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Services.NameRules;
+using ApplicationPatcher.Wpf.Services.NameRules.Specific;
 using ApplicationPatcher.Wpf.Services.PropertyGrouper;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
@@ -22,7 +23,16 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper {
 				CommandCanExecuteMethodNameRules = new Configurations.NameRules { Prefix = "CanExecute", Suffix = "Method", Type = NameRulesType.UpperCamelCase }
 			};
 
-			var propertyGrouperService = new PropertyGrouperService(applicationPatcherWpfConfiguration, new NameRulesService(applicationPatcherWpfConfiguration));
+			var specificNameRulesServices =
+				new SpecificNameRulesService[] {
+					new AllLowerNameRules(),
+					new AllUpperNameRules(),
+					new FirstUpperNameRules(),
+					new LowerCamelCaseNameRules(),
+					new UpperCamelCaseNameRules()
+				};
+
+			var propertyGrouperService = new PropertyGrouperService(applicationPatcherWpfConfiguration, new NameRulesService(applicationPatcherWpfConfiguration, specificNameRulesServices));
 
 			var assembly = FakeCommonAssemblyBuilder.Create();
 			var commandType = FakeCommonTypeBuilder.Create(KnownTypeNames.ICommand).Build();
