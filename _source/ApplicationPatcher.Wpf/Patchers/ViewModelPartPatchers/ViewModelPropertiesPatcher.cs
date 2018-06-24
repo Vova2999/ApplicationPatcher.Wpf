@@ -18,7 +18,7 @@ namespace ApplicationPatcher.Wpf.Patchers.ViewModelPartPatchers {
 
 		public override PatchResult Patch(CommonAssembly commonAssembly, CommonType viewModelBaseType, CommonType viewModelType, ViewModelPatchingType patchingType) {
 			log.Info("Patching properties...");
-			
+
 			var propertyGroups = propertyGrouperService.GetGroups(commonAssembly, viewModelType, patchingType);
 
 			log.Info("Properties was patched");

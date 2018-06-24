@@ -11,6 +11,7 @@ namespace ApplicationPatcher.Wpf.Configurations {
 		public NameRules CommandPropertyNameRules { get; set; }
 		public NameRules CommandExecuteMethodNameRules { get; set; }
 		public NameRules CommandCanExecuteMethodNameRules { get; set; }
+		public bool ConnectByNameIfExsistConnectAttribute { get; set; }
 		public ViewModelPatchingType DefaultViewModelPatchingType { get; set; }
 	}
 }

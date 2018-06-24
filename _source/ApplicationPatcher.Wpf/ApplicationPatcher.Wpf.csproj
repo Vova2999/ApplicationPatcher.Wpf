@@ -76,6 +76,7 @@
     <Compile Include="Configurations\NameRulesType.cs" />
     <Compile Include="Exceptions\PropertyPatchingException.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\MatchExtensions.cs" />
     <Compile Include="KnownTypeNames.cs" />
     <Compile Include="Patchers\ViewModelPartPatcher.cs" />

@@ -42,6 +42,7 @@
     <Compile Include="Attributes\ConnectPropertyToMethodAttribute.cs" />
     <Compile Include="Attributes\NotPatchingCommandAttribute.cs" />
     <Compile Include="Attributes\NotPatchingPropertyAttribute.cs" />
+    <Compile Include="Attributes\NotUseSearchByName.cs" />
     <Compile Include="Attributes\PatchingCommandAttribute.cs" />
     <Compile Include="Attributes\PatchingPropertyAttribute.cs" />
     <Compile Include="Attributes\PatchingViewModelAttribute.cs" />
