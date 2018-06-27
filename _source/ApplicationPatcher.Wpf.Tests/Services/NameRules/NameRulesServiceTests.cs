@@ -35,87 +35,17 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 			nameRulesService = new NameRulesService(applicationPatcherWpfConfiguration, specificNameRulesServices);
 		}
 
+
 		[Test]
-		public void ConvertName_CommandCanExecuteMethodName_To_CommandExecuteMethodName() {
-			var names = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
-			var expectedNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
-			CheckConvertNames(names, UseNameRulesFor.CommandCanExecuteMethod, UseNameRulesFor.CommandExecuteMethod, expectedNames);
+		public void IsNameValid_InvalidNames_FieldName() {
+			var invalidNames = new[] { "AnyAction", "_any2Action", "anYACtIon", "a11nYaCtIo11NN" };
+			CheckInvalidNames(invalidNames, UseNameRulesFor.Field);
 		}
 
 		[Test]
-		public void ConvertName_CommandCanExecuteMethodName_To_CommandPropertyName() {
-			var names = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
-			var expectedNames = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11nCommand" };
-			CheckConvertNames(names, UseNameRulesFor.CommandCanExecuteMethod, UseNameRulesFor.CommandProperty, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_CommandExecuteMethodName_To_CommandCanExecuteMethodName() {
-			var names = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
-			var expectedNames = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
-			CheckConvertNames(names, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandCanExecuteMethod, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_CommandExecuteMethodName_To_CommandPropertyName() {
-			var names = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
-			var expectedNames = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11nCommand" };
-			CheckConvertNames(names, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandProperty, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_CommandFieldName_To_CommandPropertyName() {
-			var names = new[] { "anyActionCommand", "any2ActionCommand", "anYaCtIonCommand", "a11nYaCtIo11NCommand" };
-			var expectedNames = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
-			CheckConvertNames(names, UseNameRulesFor.CommandField, UseNameRulesFor.CommandProperty, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_CommandPropertyName_To_CommandCanExecuteMethodName() {
-			var names = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
-			var expectedNames = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11NMethod" };
-			CheckConvertNames(names, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandCanExecuteMethod, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_CommandPropertyName_To_CommandExecuteMethodName() {
-			var names = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
-			var expectedNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11NMethod" };
-			CheckConvertNames(names, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandExecuteMethod, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_CommandPropertyName_To_CommandFieldName() {
-			var names = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
-			var expectedNames = new[] { "anyActionCommand", "any2ActionCommand", "anYaCtIonCommand", "a11nYaCtIo11NCommand" };
-			CheckConvertNames(names, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandField, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_FieldName_To_PropertyName() {
-			var names = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
-			var expectedNames = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
-			CheckConvertNames(names, UseNameRulesFor.Field, UseNameRulesFor.Property, expectedNames);
-		}
-
-		[Test]
-		public void ConvertName_PropertyName_To_FieldName() {
-			var names = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
-			var expectedNames = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
-			CheckConvertNames(names, UseNameRulesFor.Property, UseNameRulesFor.Field, expectedNames);
-		}
-
-
-		[Test]
-		public void IsNameValid_InvalidNames_CommandCanExecuteMethodName() {
-			var invalidNames = new[] { "ExecuteAnyActionMethod", "CanAny2ActionMethod", "CanExecuteAnYaCtIon", "CanExecuteAA11nYaCtIo11nMethod" };
-			CheckInvalidNames(invalidNames, UseNameRulesFor.CommandCanExecuteMethod);
-		}
-
-		[Test]
-		public void IsNameValid_InvalidNames_CommandExecuteMethodName() {
-			var invalidNames = new[] { "AnyActionMethod", "ExecuteAny2Action", "EeexecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11NNnMethod" };
-			CheckInvalidNames(invalidNames, UseNameRulesFor.CommandExecuteMethod);
+		public void IsNameValid_InvalidNames_PropertyName() {
+			var invalidNames = new[] { "anyAction", "Any2AAction", "AnYACtIon", "A11nYaCtIo11NN" };
+			CheckInvalidNames(invalidNames, UseNameRulesFor.Property);
 		}
 
 		[Test]
@@ -131,28 +61,28 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		}
 
 		[Test]
-		public void IsNameValid_InvalidNames_FieldName() {
-			var invalidNames = new[] { "AnyAction", "_any2Action", "anYACtIon", "a11nYaCtIo11NN" };
-			CheckInvalidNames(invalidNames, UseNameRulesFor.Field);
+		public void IsNameValid_InvalidNames_CommandExecuteMethodName() {
+			var invalidNames = new[] { "AnyActionMethod", "ExecuteAny2Action", "EeexecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11NNnMethod" };
+			CheckInvalidNames(invalidNames, UseNameRulesFor.CommandExecuteMethod);
 		}
 
 		[Test]
-		public void IsNameValid_InvalidNames_PropertyName() {
-			var invalidNames = new[] { "anyAction", "Any2AAction", "AnYACtIon", "A11nYaCtIo11NN" };
-			CheckInvalidNames(invalidNames, UseNameRulesFor.Property);
+		public void IsNameValid_InvalidNames_CommandCanExecuteMethodName() {
+			var invalidNames = new[] { "ExecuteAnyActionMethod", "CanAny2ActionMethod", "CanExecuteAnYaCtIon", "CanExecuteAA11nYaCtIo11nMethod" };
+			CheckInvalidNames(invalidNames, UseNameRulesFor.CommandCanExecuteMethod);
 		}
 
 
 		[Test]
-		public void IsNameValid_ValidNames_CommandCanExecuteMethodName() {
-			var validNames = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
-			CheckValidNames(validNames, UseNameRulesFor.CommandCanExecuteMethod);
+		public void IsNameValid_ValidNames_FieldName() {
+			var validNames = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
+			CheckValidNames(validNames, UseNameRulesFor.Field);
 		}
 
 		[Test]
-		public void IsNameValid_ValidNames_CommandExecuteMethodName() {
-			var validNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
-			CheckValidNames(validNames, UseNameRulesFor.CommandExecuteMethod);
+		public void IsNameValid_ValidNames_PropertyName() {
+			var validNames = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
+			CheckValidNames(validNames, UseNameRulesFor.Property);
 		}
 
 		[Test]
@@ -168,15 +98,86 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		}
 
 		[Test]
-		public void IsNameValid_ValidNames_FieldName() {
-			var validNames = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
-			CheckValidNames(validNames, UseNameRulesFor.Field);
+		public void IsNameValid_ValidNames_CommandExecuteMethodName() {
+			var validNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
+			CheckValidNames(validNames, UseNameRulesFor.CommandExecuteMethod);
 		}
 
 		[Test]
-		public void IsNameValid_ValidNames_PropertyName() {
-			var validNames = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
-			CheckValidNames(validNames, UseNameRulesFor.Property);
+		public void IsNameValid_ValidNames_CommandCanExecuteMethodName() {
+			var validNames = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
+			CheckValidNames(validNames, UseNameRulesFor.CommandCanExecuteMethod);
+		}
+
+
+		[Test]
+		public void ConvertName_FieldName_To_PropertyName() {
+			var names = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
+			var expectedNames = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
+			CheckConvertNames(names, UseNameRulesFor.Field, UseNameRulesFor.Property, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_PropertyName_To_FieldName() {
+			var names = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
+			var expectedNames = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
+			CheckConvertNames(names, UseNameRulesFor.Property, UseNameRulesFor.Field, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandFieldName_To_CommandPropertyName() {
+			var names = new[] { "anyActionCommand", "any2ActionCommand", "anYaCtIonCommand", "a11nYaCtIo11NCommand" };
+			var expectedNames = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
+			CheckConvertNames(names, UseNameRulesFor.CommandField, UseNameRulesFor.CommandProperty, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandPropertyName_To_CommandFieldName() {
+			var names = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
+			var expectedNames = new[] { "anyActionCommand", "any2ActionCommand", "anYaCtIonCommand", "a11nYaCtIo11NCommand" };
+			CheckConvertNames(names, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandField, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandPropertyName_To_CommandExecuteMethodName() {
+			var names = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
+			var expectedNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11NMethod" };
+			CheckConvertNames(names, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandExecuteMethod, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandPropertyName_To_CommandCanExecuteMethodName() {
+			var names = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11NCommand" };
+			var expectedNames = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11NMethod" };
+			CheckConvertNames(names, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandCanExecuteMethod, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandCanExecuteMethodName_To_CommandPropertyName() {
+			var names = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
+			var expectedNames = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11nCommand" };
+			CheckConvertNames(names, UseNameRulesFor.CommandCanExecuteMethod, UseNameRulesFor.CommandProperty, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandCanExecuteMethodName_To_CommandExecuteMethodName() {
+			var names = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
+			var expectedNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
+			CheckConvertNames(names, UseNameRulesFor.CommandCanExecuteMethod, UseNameRulesFor.CommandExecuteMethod, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandExecuteMethodName_To_CommandPropertyName() {
+			var names = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
+			var expectedNames = new[] { "AnyActionCommand", "Any2ActionCommand", "AnYaCtIonCommand", "A11nYaCtIo11nCommand" };
+			CheckConvertNames(names, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandProperty, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_CommandExecuteMethodName_To_CommandCanExecuteMethodName() {
+			var names = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
+			var expectedNames = new[] { "CanExecuteAnyActionMethod", "CanExecuteAny2ActionMethod", "CanExecuteAnYaCtIonMethod", "CanExecuteA11nYaCtIo11nMethod" };
+			CheckConvertNames(names, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandCanExecuteMethod, expectedNames);
 		}
 
 

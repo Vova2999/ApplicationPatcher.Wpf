@@ -5,6 +5,7 @@ using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Core.Types.Interfaces;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
+using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
@@ -61,7 +62,7 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 					$"connection in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{x.Field.Name}'"));
 
 			errorsService.AddErrors(connectFieldToPropertyAttributes
-				.Where(x => x.Property.ContainsAttribute<NotPatchingPropertyAttribute>())
+				.Where(x => x.Property != null && x.Property.ContainsAttribute<NotPatchingPropertyAttribute>())
 				.Select(x => $"Patching property '{x.Property.Name}' can not have '{nameof(NotPatchingPropertyAttribute)}', " +
 					$"connection in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{x.Field.Name}'"));
 
@@ -70,6 +71,11 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 				.SelectMany(property => property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>()
 					.Select(attribute => new { Property = property, Attribute = attribute, Field = viewModelType.GetField(attribute.ConnectingFieldName) }))
 				.ToArray();
+
+			errorsService.AddErrors(connectPropertyToFieldAttributes
+				.Where(x => x.Property.ContainsAttribute<NotPatchingPropertyAttribute>())
+				.Select(x => $"Patching property '{x.Property.Name}' can not have '{nameof(NotPatchingPropertyAttribute)}', " +
+					$"connection in '{nameof(ConnectPropertyToFieldAttribute)}' at property '{x.Property.Name}'"));
 
 			errorsService.AddErrors(connectPropertyToFieldAttributes
 				.Where(x => x.Field == null)
@@ -97,7 +103,7 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 		private void CheckPatchingPropertyNames(IEnumerable<CommonProperty> patchingProperties) {
 			var errorsService = new ErrorsService();
 			var propertiesWithUseSearchByName = patchingProperties
-				.Where(property => property.NotContainsAttribute<NotUseSearchByName>() &&
+				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
 					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
 
 			errorsService.AddErrors(propertiesWithUseSearchByName
@@ -118,25 +124,25 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 		}
 		private void AddFieldsByName(IDictionary<CommonProperty, List<CommonField>> propertyToFieldsGroups, IHasFields viewModelType) {
 			var propertiesWithUseSearchByName = propertyToFieldsGroups.Keys
-				.Where(property => property.NotContainsAttribute<NotUseSearchByName>() &&
+				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
 					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
 
 			foreach (var property in propertiesWithUseSearchByName) {
 				var fieldName = nameRulesService.ConvertName(property.Name, UseNameRulesFor.Property, UseNameRulesFor.Field);
 				if (viewModelType.TryGetField(fieldName, out var field))
-					propertyToFieldsGroups.GetOrCreate(property, () => new List<CommonField>()).Add(field);
+					propertyToFieldsGroups.GetOrCreate(property, () => new List<CommonField>()).AddIfNotContains(field);
 			}
 		}
 		private static void AddFieldsFromConnectPropertyToFieldAttribute(IDictionary<CommonProperty, List<CommonField>> propertyToFieldsGroups, IHasFields viewModelType) {
 			foreach (var property in propertyToFieldsGroups.Keys) {
 				foreach (var attribute in property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>())
-					propertyToFieldsGroups.GetOrCreate(property, () => new List<CommonField>()).Add(viewModelType.GetField(attribute.ConnectingFieldName, true));
+					propertyToFieldsGroups.GetOrCreate(property, () => new List<CommonField>()).AddIfNotContains(viewModelType.GetField(attribute.ConnectingFieldName, true));
 			}
 		}
 		private static void AddFieldsFromConnectFieldToPropertyAttribute(IDictionary<CommonProperty, List<CommonField>> propertyToFieldsGroups, CommonType viewModelType, IHasType commandType) {
 			foreach (var field in viewModelType.Fields.Where(f => f.IsNotInheritedFrom(commandType))) {
 				foreach (var attribute in field.GetReflectionAttributes<ConnectFieldToPropertyAttribute>())
-					propertyToFieldsGroups.GetOrCreate(viewModelType.GetProperty(attribute.ConnectingPropertyName, true), () => new List<CommonField>()).Add(field);
+					propertyToFieldsGroups.GetOrCreate(viewModelType.GetProperty(attribute.ConnectingPropertyName, true), () => new List<CommonField>()).AddIfNotContains(field);
 			}
 		}
 
@@ -144,8 +150,8 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 			var errorsService = new ErrorsService();
 
 			errorsService.AddErrors(propertyToFieldsGroups
-				.Where(group => !group.Value.Any() && group.Key.ContainsAttribute<NotUseSearchByName>())
-				.Select(group => $"Not found field for property '{group.Key.Name}' when using '{nameof(NotUseSearchByName)}'"));
+				.Where(group => !group.Value.Any() && group.Key.ContainsAttribute<NotUseSearchByNameAttribute>())
+				.Select(group => $"Not found field for property '{group.Key.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"));
 
 			errorsService.AddErrors(propertyToFieldsGroups
 				.Where(group => group.Value.Count > 1)

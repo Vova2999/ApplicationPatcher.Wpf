@@ -23,17 +23,17 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 		}
 
 		[Test]
+		public void InvalidNames_StartsWithDigit() {
+			var invalidNames = new[] { "4thisIsInvalidName", "3hisIsInvalidName", "12thisIsInvalidName", "0thisIsInvalidName", "9thisIsInvalidName" };
+			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, null, null));
+			CheckValidName("thisIsValidName", null, null);
+		}
+
+		[Test]
 		public void InvalidNames_IncorrectPrefix() {
 			var invalidNames = new[] { "thisIsInvalidName", "_thisIsInvalidName", "pre_thisIsInvalidName", "thisIsInvalidName_", "thisIsInvalidName_prefix_" };
 			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, "_prefix_", null));
 			CheckValidName("_prefix_thisIsValidName", "_prefix_", null);
-		}
-
-		[Test]
-		public void InvalidNames_IncorrectPrefix_IncorrectSuffix() {
-			var invalidNames = new[] { "thisIsInvalidName", "_thisIsInvalidName", "thisIsInvalidName_", "_thisIsInvalidName_", "_suffix_thisIsInvalidName_prefix_" };
-			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, "_prefix_", "_suffix_"));
-			CheckValidName("_prefix_thisIsValidName_suffix_", "_prefix_", "_suffix_");
 		}
 
 		[Test]
@@ -44,10 +44,10 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 		}
 
 		[Test]
-		public void InvalidNames_StartsWithDigit() {
-			var invalidNames = new[] { "4thisIsInvalidName", "3hisIsInvalidName", "12thisIsInvalidName", "0thisIsInvalidName", "9thisIsInvalidName" };
-			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, null, null));
-			CheckValidName("thisIsValidName", null, null);
+		public void InvalidNames_IncorrectPrefixAndSuffix() {
+			var invalidNames = new[] { "thisIsInvalidName", "_thisIsInvalidName", "thisIsInvalidName_", "_thisIsInvalidName_", "_suffix_thisIsInvalidName_prefix_" };
+			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, "_prefix_", "_suffix_"));
+			CheckValidName("_prefix_thisIsValidName_suffix_", "_prefix_", "_suffix_");
 		}
 	}
 }

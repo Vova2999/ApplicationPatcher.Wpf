@@ -25,17 +25,18 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 		}
 
 		[Test]
+		public void InvalidNames_StartsWithDigit() {
+			var invalidNames = new[] { "4THIS_IS_INVALID_NAME", "3HIS_IS_INVALID_NAME", "12THIS_IS_INVALID_NAME", "0THIS_IS_INVALID_NAME", "9THIS_IS_INVALID_NAME" };
+			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, null, null));
+			CheckValidName("THIS_IS_VALID_NAME", null, null);
+			CheckValidName("THIS_IS_VALID_NAME_", null, null);
+		}
+
+		[Test]
 		public void InvalidNames_IncorrectPrefix() {
 			var invalidNames = new[] { "THIS_IS_INVALID_NAME", "_THIS_IS_INVALID_NAME", "pre_THIS_IS_INVALID_NAME", "THIS_IS_INVALID_NAME_", "THIS_IS_INVALID_NAME_prefix_" };
 			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, "_prefix_", null));
 			CheckValidName("_prefix_THIS_IS_VALID_NAME", "_prefix_", null);
-		}
-
-		[Test]
-		public void InvalidNames_IncorrectPrefix_IncorrectSuffix() {
-			var invalidNames = new[] { "THIS_IS_INVALID_NAME", "_THIS_IS_INVALID_NAME", "THIS_IS_INVALID_NAME_", "_THIS_IS_INVALID_NAME_", "_suffix_THIS_IS_INVALID_NAME_prefix_" };
-			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, "_prefix_", "_suffix_"));
-			CheckValidName("_prefix_THIS_IS_VALID_NAME_suffix_", "_prefix_", "_suffix_");
 		}
 
 		[Test]
@@ -46,11 +47,10 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 		}
 
 		[Test]
-		public void InvalidNames_StartsWithDigit() {
-			var invalidNames = new[] { "4THIS_IS_INVALID_NAME", "3HIS_IS_INVALID_NAME", "12THIS_IS_INVALID_NAME", "0THIS_IS_INVALID_NAME", "9THIS_IS_INVALID_NAME" };
-			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, null, null));
-			CheckValidName("THIS_IS_VALID_NAME", null, null);
-			CheckValidName("THIS_IS_VALID_NAME_", null, null);
+		public void InvalidNames_IncorrectPrefixAndSuffix() {
+			var invalidNames = new[] { "THIS_IS_INVALID_NAME", "_THIS_IS_INVALID_NAME", "THIS_IS_INVALID_NAME_", "_THIS_IS_INVALID_NAME_", "_suffix_THIS_IS_INVALID_NAME_prefix_" };
+			invalidNames.ForEach(invalidName => CheckInvalidName(invalidName, "_prefix_", "_suffix_"));
+			CheckValidName("_prefix_THIS_IS_VALID_NAME_suffix_", "_prefix_", "_suffix_");
 		}
 	}
 }

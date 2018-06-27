@@ -17,15 +17,13 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		}
 
 		[SetUp]
-		public void SpecificNameRulesServiceTestsBaseSetUp() {
+		public void SetUp() {
 			random = new Random(1);
 		}
 
 		[Test]
-		public void ValidNames_WithPrefix_WithSuffix() {
-			var prefixes = new[] { "_", "Prefix", "Prefix_", "_Prefix_" };
-			var suffixes = new[] { "_", "Suffix", "_Suffix", "_Suffix_" };
-			prefixes.ForEach(prefix => suffixes.ForEach(suffix => CheckValidNames(prefix, suffix)));
+		public void ValidNames_WithoutPrefix_WithoutSuffix() {
+			CheckValidNames(null, null);
 		}
 
 		[Test]
@@ -41,8 +39,10 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		}
 
 		[Test]
-		public void ValidNames_WithoutPrefix_WithoutSuffix() {
-			CheckValidNames(null, null);
+		public void ValidNames_WithPrefix_WithSuffix() {
+			var prefixes = new[] { "_", "Prefix", "Prefix_", "_Prefix_" };
+			var suffixes = new[] { "_", "Suffix", "_Suffix", "_Suffix_" };
+			prefixes.ForEach(prefix => suffixes.ForEach(suffix => CheckValidNames(prefix, suffix)));
 		}
 
 		private void CheckValidNames(string prefix, string suffix) {

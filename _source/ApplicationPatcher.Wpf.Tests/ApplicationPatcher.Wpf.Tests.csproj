@@ -96,7 +96,10 @@
     <Compile Include="Services\NameRules\Specific\FirstUpperNameRulesTests.cs" />
     <Compile Include="Services\NameRules\Specific\LowerCamelCaseNameRulesTests.cs" />
     <Compile Include="Services\NameRules\Specific\UpperCamelCaseNameRulesTests.cs" />
-    <Compile Include="Services\PropertyGrouper\PropertyGrouperServiceTests.cs" />
+    <Compile Include="Services\PropertyGrouper\Parts\PropertyGrouperServiceAttributesTests.cs" />
+    <Compile Include="Services\PropertyGrouper\Parts\PropertyGrouperServiceGroupsTests.cs" />
+    <Compile Include="Services\PropertyGrouper\Parts\PropertyGrouperServiceNamesTests.cs" />
+    <Compile Include="Services\PropertyGrouper\PropertyGrouperServiceTestsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
