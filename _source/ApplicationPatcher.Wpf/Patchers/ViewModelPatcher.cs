@@ -42,7 +42,7 @@ namespace ApplicationPatcher.Wpf.Patchers {
 				log.Info($"Type '{viewModel.FullName}' was loaded");
 
 				var patchingType = viewModel.GetReflectionAttribute<PatchingViewModelAttribute>()?.ViewModelPatchingType ?? applicationPatcherWpfConfiguration.DefaultViewModelPatchingType;
-				log.Info($"View model patching type: {patchingType}");
+				log.Info($"View model patching type: '{patchingType}'");
 
 				var patchResult = PatchHelper.PatchApplication(viewModelPartPatchers, patcher => patcher.Patch(commonAssembly, viewModelBaseType, viewModel, patchingType), log);
 				if (patchResult == PatchResult.Cancel)

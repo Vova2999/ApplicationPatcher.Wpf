@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -74,7 +75,9 @@
     <Compile Include="ApplicationPatcherWpfNinjectModule.cs" />
     <Compile Include="Configurations\NameRules.cs" />
     <Compile Include="Configurations\NameRulesType.cs" />
+    <Compile Include="Exceptions\CommandPatchingException.cs" />
     <Compile Include="Exceptions\PropertyPatchingException.cs" />
+    <Compile Include="Extensions\CharExtensions.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\MatchExtensions.cs" />
     <Compile Include="KnownTypeNames.cs" />
@@ -83,6 +86,8 @@
     <Compile Include="Patchers\ViewModelPatcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\CommandGrouper\CommandGroup.cs" />
+    <Compile Include="Services\CommandGrouper\CommandGrouperService.cs" />
     <Compile Include="Services\ErrorsService.cs" />
     <Compile Include="Services\NameRules\NameRulesService.cs" />
     <Compile Include="Services\NameRules\SpecificNameRulesService.cs" />

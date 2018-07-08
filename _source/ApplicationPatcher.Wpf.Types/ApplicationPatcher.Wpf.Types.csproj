@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -46,7 +47,6 @@
     <Compile Include="Attributes\PatchingCommandAttribute.cs" />
     <Compile Include="Attributes\PatchingPropertyAttribute.cs" />
     <Compile Include="Attributes\PatchingViewModelAttribute.cs" />
-    <Compile Include="Enums\MethodType.cs" />
     <Compile Include="Enums\ViewModelPatchingType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

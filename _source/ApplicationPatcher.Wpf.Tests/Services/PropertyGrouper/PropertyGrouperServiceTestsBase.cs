@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Tests;
 using ApplicationPatcher.Wpf.Configurations;
@@ -52,12 +53,16 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper {
 		protected void CheckValidViewModel(CommonType viewModelType, ViewModelPatchingType viewModelPatchingType, bool connectByNameIfExsistConnectAttribute = false) {
 			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
 			var groups = propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
+			Console.WriteLine("Groups missing");
+
 			groups.Should().HaveCount(0);
 		}
 
 		protected void CheckValidViewModel(CommonType viewModelType, ViewModelPatchingType viewModelPatchingType, string fieldName, string propertyName, bool connectByNameIfExsistConnectAttribute = false) {
 			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
 			var groups = propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
+			Console.WriteLine(groups.Select((group, i) => $"{i}) Property: {group.Property?.Name ?? "null"}, Field: {group.Field?.Name ?? "null"}").JoinToString("\n"));
+
 			groups.Should().HaveCount(1);
 			groups.First().Field?.Name.Should().Be(fieldName);
 			groups.First().Property?.Name.Should().Be(propertyName);
@@ -65,11 +70,14 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper {
 
 		protected void CheckInvalidViewModel(CommonType viewModelType, ViewModelPatchingType viewModelPatchingType, string errorMessage, bool connectByNameIfExsistConnectAttribute = false) {
 			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
-			new Action(() => propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType))
-				.Should()
-				.Throw<PropertyPatchingException>()
-				.And.Message.Should()
-				.Contain(errorMessage);
+			try {
+				propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
+				Assert.Fail($"Expected a '{nameof(PropertyPatchingException)}' to be thrown, but no exception was thrown");
+			}
+			catch (PropertyPatchingException exception) {
+				Console.WriteLine(exception.Message);
+				exception.Message.Should().Contain(errorMessage);
+			}
 		}
 	}
 }
