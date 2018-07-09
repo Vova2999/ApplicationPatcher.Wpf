@@ -4,13 +4,13 @@ using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 
-namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
+namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper {
 	[TestFixture]
 	public class PropertyGrouperServiceGroupsTests : PropertyGrouperServiceTestsBase {
 		[Test]
 		public void NotFoundFieldForPropertyWhenUsingNotUseSearchByNameAttribute_InvalidViewModel() {
-			const string patchingFieldName = "otherName";
 			const string patchingPropertyName = "AnyValue";
+			const string patchingFieldName = "otherName";
 
 			var firstViewModelType = FakeCommonTypeBuilder.Create("FirstViewModel")
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new NotUseSearchByNameAttribute())
@@ -25,11 +25,13 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.All,
 				$"Not found field for property '{patchingPropertyName}' when using '{nameof(NotUseSearchByNameAttribute)}'");
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
+
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.All,
 				$"Not found field for property '{patchingPropertyName}' when using '{nameof(NotUseSearchByNameAttribute)}'");
+
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.Selectively,
 				$"Not found field for property '{patchingPropertyName}' when using '{nameof(NotUseSearchByNameAttribute)}'");
@@ -37,8 +39,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 
 		[Test]
 		public void NotFoundFieldForPropertyWhenUsingNotUseSearchByNameAttribute_ValidViewModel() {
-			const string patchingFieldName = "otherName";
 			const string patchingPropertyName = "AnyValue";
+			const string patchingFieldName = "otherName";
 
 			var firstViewModelType = FakeCommonTypeBuilder.Create("FirstViewModel")
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new NotUseSearchByNameAttribute(), new ConnectPropertyToFieldAttribute(patchingFieldName))
@@ -50,18 +52,18 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 				.AddField(patchingFieldName, typeof(int), new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.Build();
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, patchingFieldName, patchingPropertyName);
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, patchingFieldName, patchingPropertyName);
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, patchingFieldName, patchingPropertyName);
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, patchingFieldName, patchingPropertyName);
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
 		public void MultiConnectPropertyToFieldFound_InvalidViewModel() {
+			const string patchingPropertyName = "AnyValue";
 			const string patchingFirstFieldName = "otherName";
 			const string patchingSecondFieldName = "anyValue";
-			const string patchingPropertyName = "AnyValue";
 
 			var firstViewModelType = FakeCommonTypeBuilder.Create("FirstViewModel")
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new ConnectPropertyToFieldAttribute(patchingFirstFieldName))
@@ -90,15 +92,19 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.All,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFirstFieldName}'",
+				false,
 				true);
+
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.Selectively,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFirstFieldName}'",
+				false,
 				true);
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.All,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingFirstFieldName}', '{patchingSecondFieldName}'");
+
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.Selectively,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingFirstFieldName}', '{patchingSecondFieldName}'");
@@ -106,11 +112,13 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 			CheckInvalidViewModel(thirdViewModelType,
 				ViewModelPatchingType.All,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFirstFieldName}'");
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, patchingFirstFieldName, patchingPropertyName);
+
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFirstFieldName));
 
 			CheckInvalidViewModel(fourthViewModelType,
 				ViewModelPatchingType.All,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFirstFieldName}'");
+
 			CheckInvalidViewModel(fourthViewModelType,
 				ViewModelPatchingType.Selectively,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingFirstFieldName}', '{patchingSecondFieldName}'");
@@ -118,9 +126,9 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 
 		[Test]
 		public void MultiConnectPropertyToFieldFound_ValidViewModel() {
+			const string patchingPropertyName = "AnyValue";
 			const string patchingFirstFieldName = "otherName";
 			const string patchingSecondFieldName = "anyValue";
-			const string patchingPropertyName = "AnyValue";
 
 			var firstViewModelType = FakeCommonTypeBuilder.Create("FirstViewModel")
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
@@ -140,20 +148,20 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 				.AddField(patchingSecondFieldName, typeof(int))
 				.Build();
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, patchingSecondFieldName, patchingPropertyName);
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingSecondFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, patchingFirstFieldName, patchingPropertyName);
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, patchingFirstFieldName, patchingPropertyName);
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFirstFieldName));
 
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.All, patchingFirstFieldName, patchingPropertyName);
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, patchingFirstFieldName, patchingPropertyName);
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFirstFieldName));
 		}
 
 		[Test]
 		public void TypesDoNotMatchInsideGroup_InvalidViewModel() {
-			const string patchingFieldName = "anyValue";
 			const string patchingPropertyName = "AnyValue";
+			const string patchingFieldName = "anyValue";
 
 			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
@@ -163,21 +171,22 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 			CheckInvalidViewModel(viewModelType,
 				ViewModelPatchingType.All,
 				$"Types do not match inside group: property '{patchingPropertyName}', field '{patchingFieldName}'");
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
+
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
 		}
 
 		[Test]
 		public void TypesDoNotMatchInsideGroup_ValidViewModel() {
-			const string patchingFieldName = "anyValue";
 			const string patchingPropertyName = "AnyValue";
+			const string patchingFieldName = "anyValue";
 
 			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
 				.AddField(patchingFieldName, typeof(int))
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, patchingFieldName, patchingPropertyName);
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
 		}
 	}
 }

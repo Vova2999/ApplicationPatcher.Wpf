@@ -31,7 +31,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 			var patchingCommandGroups = GetPatchingCommandGroups(patchingMethods, viewModelType, commandType);
 			CheckPatchingCommandGroups(patchingCommandGroups);
 
-			throw new Exception();
+			return patchingCommandGroups.Select(group => new CommandGroup(group.Fields.SingleOrDefault(), group.Properties.SingleOrDefault(), group.ExecuteMethod, group.CanExecuteMethods.SingleOrDefault())).ToArray();
 		}
 
 		private static void CheckViewModel(IHasType commandType, CommonType viewModelType) {
@@ -91,13 +91,13 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					.Where(x => x.Method.ReturnType == typeof(void) || x.Method.ReturnType == typeof(bool))
 					.Where(x => x.Methods.Length == 1 && (x.Methods.Single().ReturnType == typeof(void) || x.Methods.Single().ReturnType == typeof(bool)))
 					.Where(x => x.Method.ReturnType == typeof(void) && x.Methods.Single().ReturnType == typeof(void))
-					.Select(x => $"Can not be connect two execute methods: '{x.Method.Name}' and '{x.Methods.Single().Name}'" +
+					.Select(x => $"Can not be connect two execute methods: '{x.Method.Name}' and '{x.Methods.Single().Name}', " +
 						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
 				.AddErrors(connectMethodToMethodAttributes
 					.Where(x => x.Method.ReturnType == typeof(void) || x.Method.ReturnType == typeof(bool))
 					.Where(x => x.Methods.Length == 1 && (x.Methods.Single().ReturnType == typeof(void) || x.Methods.Single().ReturnType == typeof(bool)))
 					.Where(x => x.Method.ReturnType == typeof(bool) && x.Methods.Single().ReturnType == typeof(bool))
-					.Select(x => $"Can not be connect two can execute methods: '{x.Method.Name}' and '{x.Methods.Single().Name}'" +
+					.Select(x => $"Can not be connect two can execute methods: '{x.Method.Name}' and '{x.Methods.Single().Name}', " +
 						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"));
 
 			var connectMethodToPropertyAttributes = viewModelType.Methods
@@ -111,8 +111,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					.Select(x => $"Patching method '{x.Method.Name}' can not have parameters"))
 				.AddErrors(connectMethodToPropertyAttributes
 					.Where(x => x.Method.ContainsAttribute<NotPatchingCommandAttribute>())
-					.Select(x => $"Patching method '{x.Method.Name}' can not have " +
-						$"'{nameof(PatchingCommandAttribute)}' and '{nameof(NotPatchingCommandAttribute)}' at the same time"))
+					.Select(x => $"Patching method '{x.Method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'"))
 				.AddErrors(connectMethodToPropertyAttributes
 					.Where(x => x.Method.ReturnType != typeof(void))
 					.Select(x => $"Patching method '{x.Method.Name}' can not have " +
@@ -124,7 +123,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 				.AddErrors(connectMethodToPropertyAttributes
 					.Where(x => x.Property != null && x.Property.IsNotInheritedFrom(commandType))
 					.Select(x => $"Property '{x.Property.Name}' can not have '{x.Property.Type.FullName}' type, " +
-						$"allowable types: all inherited from '{KnownTypeNames.ICommand}'" +
+						$"allowable types: all inherited from '{KnownTypeNames.ICommand}', " +
 						$"connection in '{nameof(ConnectMethodToPropertyAttribute)}' at method '{x.Method.Name}'"));
 
 			var connectPropertyToMethodAttributes = viewModelType.Properties
@@ -135,9 +134,8 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 			errorsService
 				.AddErrors(connectPropertyToMethodAttributes
 					.Where(x => x.Property.IsNotInheritedFrom(commandType))
-					.Select(x => $"Property '{x.Property.Name}' can not have '{x.Property.Type.FullName}' type, " +
-						$"allowable types: all inherited from '{KnownTypeNames.ICommand}'" +
-						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"))
+					.Select(x => $"Patching property '{x.Property.Name}' can not have '{x.Property.Type.FullName}' type, " +
+						$"allowable types: all inherited from '{KnownTypeNames.ICommand}'"))
 				.AddErrors(connectPropertyToMethodAttributes
 					.SelectMany(x => x.NamesToMethods
 						.Where(y => !y.Methods.Any())
@@ -167,18 +165,18 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 				.AddErrors(connectPropertyToMethodAttributes
 					.Where(x => x.NamesToMethods.Length == 1 && x.NamesToMethods.Single().Methods.Length == 1)
 					.Where(x => x.NamesToMethods.Single().Methods.Single().ReturnType == typeof(bool))
-					.Select(x => $"Can not be connect to can execute method '{x.NamesToMethods.Single().Methods.Single().Name}'" +
+					.Select(x => $"Can not be connect to can execute method '{x.NamesToMethods.Single().Methods.Single().Name}', " +
 						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"))
 				.AddErrors(connectPropertyToMethodAttributes
 					.Where(x => x.NamesToMethods.Length == 2 && x.NamesToMethods[0].Methods.Length == 1 && x.NamesToMethods[1].Methods.Length == 1)
 					.Where(x => x.NamesToMethods[0].Methods.Single().ReturnType == typeof(void) && x.NamesToMethods[1].Methods.Single().ReturnType == typeof(void))
-					.Select(x => $"Can not be connect to two execute methods: '{x.NamesToMethods[0].Methods.Single().Name}' and '{x.NamesToMethods[1].Methods.Single().Name}'" +
+					.Select(x => $"Can not be connect to two execute methods: '{x.NamesToMethods[0].Methods.Single().Name}' and '{x.NamesToMethods[1].Methods.Single().Name}', " +
 						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"))
 				.AddErrors(connectPropertyToMethodAttributes
 					.Where(x => x.NamesToMethods.Length == 2 && x.NamesToMethods[0].Methods.Length == 1 && x.NamesToMethods[1].Methods.Length == 1)
 					.Where(x => x.NamesToMethods[0].Methods.Single().ReturnType == typeof(bool) && x.NamesToMethods[1].Methods.Single().ReturnType == typeof(bool))
-					.Select(x => $"Can not be connect two can execute methods: '{x.NamesToMethods[0].Methods.Single().Name}' and '{x.NamesToMethods[1].Methods.Single().Name}'" +
-						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at method '{x.Property.Name}'"));
+					.Select(x => $"Can not be connect to two can execute methods: '{x.NamesToMethods[0].Methods.Single().Name}' and '{x.NamesToMethods[1].Methods.Single().Name}', " +
+						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"));
 
 			var connectPropertyToFieldAttributes = viewModelType.Properties
 				.Where(property => property.IsInheritedFrom(commandType))
@@ -216,13 +214,14 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 				throw new CommandPatchingException(errorsService);
 		}
 
-		private static CommonMethod[] GetPatchingMethods(IHasMethods viewModelType, ViewModelPatchingType patchingType) {
+		private CommonMethod[] GetPatchingMethods(IHasMethods viewModelType, ViewModelPatchingType patchingType) {
 			return viewModelType.Methods
-				.Where(method => method.NotContainsAttribute<NotPatchingCommandAttribute>() && (
-					patchingType == ViewModelPatchingType.All && method.ReturnType == typeof(void) && !method.ParameterTypes.Any() ||
-					method.ContainsAttribute<PatchingCommandAttribute>() ||
-					method.ContainsAttribute<ConnectMethodToMethodAttribute>() ||
-					method.ContainsAttribute<ConnectMethodToPropertyAttribute>()))
+				.Where(method => method.NotContainsAttribute<NotPatchingCommandAttribute>() && method.ReturnType == typeof(void) && !method.ParameterTypes.Any() &&
+					(!applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid || nameRulesService.IsNameValid(method.Name, UseNameRulesFor.CommandExecuteMethod)) && (
+						patchingType == ViewModelPatchingType.All ||
+						method.ContainsAttribute<PatchingCommandAttribute>() ||
+						method.ContainsAttribute<ConnectMethodToMethodAttribute>() ||
+						method.ContainsAttribute<ConnectMethodToPropertyAttribute>()))
 				.ToArray();
 		}
 
@@ -250,6 +249,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 			AddGroupsFromConnectPropertyToMethodAttribute(patchingCommandGroups, viewModelType);
 
 			patchingCommandGroups = SplitGroups(patchingCommandGroups);
+			CheckPatchingPropertyNames(patchingCommandGroups.SelectMany(group => group.Properties));
 
 			FillGroupsByPropertyName(patchingCommandGroups, viewModelType, commandType);
 			FillGroupsFromConnectPropertyToFieldAttribute(patchingCommandGroups, viewModelType, commandType);
@@ -314,24 +314,49 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					: new[] { group })
 				.ToList();
 		}
+		private void CheckPatchingPropertyNames(IEnumerable<CommonProperty> patchingProperties) {
+			if (applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid)
+				return;
+
+			var propertiesWithUseSearchByName = patchingProperties
+				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()))
+				.ToArray();
+
+			var errorsService = new ErrorsService()
+				.AddErrors(propertiesWithUseSearchByName
+					.Where(method => !nameRulesService.IsNameValid(method.Name, UseNameRulesFor.CommandProperty))
+					.Select(method => $"Not valid patching command property name '{method.Name}'"));
+
+			if (errorsService.HasErrors)
+				throw new CommandPatchingException(errorsService);
+		}
 
 		private void FillGroupsByPropertyName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType, IHasType commandType) {
-			foreach (var property in viewModelType.Properties.Where(property => property.IsInheritedFrom(commandType) && property.NotContainsAttribute<NotUseSearchByNameAttribute>())) {
+			var propertiesWithUseSearchByName = patchingCommandGroups.SelectMany(group => group.Properties)
+				.Where(property => property.IsInheritedFrom(commandType) && property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()))
+				.ToArray();
+
+			if (applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid)
+				propertiesWithUseSearchByName = propertiesWithUseSearchByName.Where(property => nameRulesService.IsNameValid(property.Name, UseNameRulesFor.CommandProperty)).ToArray();
+
+			foreach (var property in propertiesWithUseSearchByName) {
 				if (!viewModelType.TryGetField(nameRulesService.ConvertName(property.Name, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandField), out var foundField))
 					continue;
 
 				foreach (var (_, _, _, fields) in patchingCommandGroups.Where(group => group.Properties.Contains(property)))
-					fields.Add(foundField);
+					fields.AddIfNotContains(foundField);
 			}
 		}
 		private static void FillGroupsFromConnectPropertyToFieldAttribute(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType, IHasType commandType) {
-			foreach (var property in viewModelType.Properties.Where(property => property.IsInheritedFrom(commandType))) {
+			foreach (var property in patchingCommandGroups.SelectMany(group => group.Properties)) {
 				var foundFields = property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>().Select(attribute => viewModelType.GetField(attribute.ConnectingFieldName, true)).ToArray();
 				if (!foundFields.Any())
 					continue;
 
 				foreach (var (_, _, _, fields) in patchingCommandGroups.Where(group => group.Properties.Contains(property)))
-					fields.AddRange(foundFields);
+					foundFields.ForEach(foundField => fields.AddIfNotContains(foundField));
 			}
 		}
 		private static void FillGroupsFromConnectFieldToPropertyAttribute(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType, IHasType commandType) {
@@ -341,7 +366,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					continue;
 
 				foreach (var (_, _, _, fields) in patchingCommandGroups.Where(group => group.Properties.Intersect(properties).Any()))
-					fields.Add(field);
+					fields.AddIfNotContains(field);
 			}
 		}
 		private static (CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields) CreateEmptyPatchingCommandGroup(CommonMethod executeMethod) {
@@ -350,45 +375,44 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 
 		private void CheckPatchingCommandGroups(IReadOnlyCollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups) {
 			var errorsService = new ErrorsService()
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.Properties.Count == 1 && group.Fields.Count > 1)
-						.Select(group => "Multi-connect property to field found: " +
-							$"property '{group.Properties.Single().Name}', fields: {group.Fields.Select(property => $"'{property.Name}'").JoinToString(", ")}"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.Properties.Count > 1)
-						.Select(group => "Multi-connect execute method to property found: " +
-							$"execute method '{group.ExecuteMethod.Name}', properties: {group.Properties.Select(property => $"'{property.Name}'").JoinToString(", ")}"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.CanExecuteMethods.Count > 1)
-						.Select(group => "Multi-connect execute method to can execute method found: " +
-							$"execute method '{group.ExecuteMethod.Name}', can execute methods: {group.CanExecuteMethods.Select(method => $"'{method.Name}'").JoinToString(", ")}"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.Properties.Count == 1 && group.Fields.Count == 1 && group.Properties.Single().IsNot(group.Fields.Single()))
-						.Select(group => $"Types do not match inside group: property '{group.Properties.Single().Name}', field '{group.Fields.Single().Name}'"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.ExecuteMethod.ParameterTypes.Any())
-						.Select(group => $"Execute method '{group.ExecuteMethod.Name}' can not have parameters"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.ExecuteMethod.ReturnType != typeof(void))
-						.Select(group => $"Execute method '{group.ExecuteMethod.Name}' can not have " +
-							$"'{group.ExecuteMethod.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.CanExecuteMethods.Count == 1 && group.CanExecuteMethods.Single().ParameterTypes.Any())
-						.Select(group => $"Can execute method '{group.CanExecuteMethods.Single().Name}' can not have parameters"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => group.CanExecuteMethods.Count == 1 && group.CanExecuteMethods.Single().ReturnType != typeof(bool))
-						.Select(group => $"Can execute method '{group.CanExecuteMethods.Single().Name}' can not have " +
-							$"'{group.CanExecuteMethods.Single().ReturnType.FullName}' return type, allowable types: '{typeof(bool).FullName}'"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => !group.Properties.Any() && group.ExecuteMethod.ContainsAttribute<NotUseSearchByNameAttribute>())
-						.Select(group => $"Not found property for execute method '{group.ExecuteMethod.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"))
-					.AddErrors(patchingCommandGroups
-						.Where(group => !group.Fields.Any() && group.Properties.Count == 1 && group.Properties.Single().ContainsAttribute<NotUseSearchByNameAttribute>())
-						.Select(group => $"Not found field for property '{group.Properties.Single().Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.Properties.Count == 1 && group.Fields.Count > 1)
+					.Select(group => "Multi-connect property to field found: " +
+						$"property '{group.Properties.Single().Name}', fields: {group.Fields.Select(property => $"'{property.Name}'").JoinToString(", ")}"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.Properties.Count > 1)
+					.Select(group => "Multi-connect execute method to property found: " +
+						$"execute method '{group.ExecuteMethod.Name}', properties: {group.Properties.Select(property => $"'{property.Name}'").JoinToString(", ")}"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.CanExecuteMethods.Count > 1)
+					.Select(group => "Multi-connect execute method to can execute method found: " +
+						$"execute method '{group.ExecuteMethod.Name}', can execute methods: {group.CanExecuteMethods.Select(method => $"'{method.Name}'").JoinToString(", ")}"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.Properties.Count == 1 && group.Fields.Count == 1 && group.Properties.Single().IsNot(group.Fields.Single()))
+					.Select(group => $"Types do not match inside group: property '{group.Properties.Single().Name}', field '{group.Fields.Single().Name}'"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.ExecuteMethod.ParameterTypes.Any())
+					.Select(group => $"Execute method '{group.ExecuteMethod.Name}' can not have parameters"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.ExecuteMethod.ReturnType != typeof(void))
+					.Select(group => $"Execute method '{group.ExecuteMethod.Name}' can not have " +
+						$"'{group.ExecuteMethod.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.CanExecuteMethods.Count == 1 && group.CanExecuteMethods.Single().ParameterTypes.Any())
+					.Select(group => $"Can execute method '{group.CanExecuteMethods.Single().Name}' can not have parameters"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => group.CanExecuteMethods.Count == 1 && group.CanExecuteMethods.Single().ReturnType != typeof(bool))
+					.Select(group => $"Can execute method '{group.CanExecuteMethods.Single().Name}' can not have " +
+						$"'{group.CanExecuteMethods.Single().ReturnType.FullName}' return type, allowable types: '{typeof(bool).FullName}'"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => !group.Properties.Any() && group.ExecuteMethod.ContainsAttribute<NotUseSearchByNameAttribute>())
+					.Select(group => $"Not found property for execute method '{group.ExecuteMethod.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"))
+				.AddErrors(patchingCommandGroups
+					.Where(group => !group.Fields.Any() && group.Properties.Count == 1 && group.Properties.Single().ContainsAttribute<NotUseSearchByNameAttribute>())
+					.Select(group => $"Not found field for property '{group.Properties.Single().Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"));
 
-				;
 			if (errorsService.HasErrors)
-				throw new PropertyPatchingException(errorsService);
+				throw new CommandPatchingException(errorsService);
 		}
 	}
 }

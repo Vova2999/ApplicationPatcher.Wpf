@@ -4,7 +4,7 @@ using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 
-namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
+namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper {
 	[TestFixture]
 	public class PropertyGrouperServiceNamesTests : PropertyGrouperServiceTestsBase {
 		[Test]
@@ -20,14 +20,22 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 				.AddProperty(patchingSecondPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new PatchingPropertyAttribute())
 				.Build();
 
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, true, false);
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, true, false);
+
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.All,
 				$"Not valid patching property name '{patchingFirstPropertyName}'");
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
+
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
+
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, true, false);
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, true, false);
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.All,
 				$"Not valid patching property name '{patchingSecondPropertyName}'");
+
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.Selectively,
 				$"Not valid patching property name '{patchingSecondPropertyName}'");
@@ -41,8 +49,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper.Parts {
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, null, patchingPropertyName);
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
 		}
 	}
 }

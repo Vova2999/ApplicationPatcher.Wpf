@@ -1,5 +1,4 @@
 ﻿using System;
-using ApplicationPatcher.Wpf.Types.Enums;
 
 namespace ApplicationPatcher.Wpf.Types.Attributes {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]

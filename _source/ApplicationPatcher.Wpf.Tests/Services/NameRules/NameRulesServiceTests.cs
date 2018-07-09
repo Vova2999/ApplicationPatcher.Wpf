@@ -3,7 +3,7 @@ using System.Linq;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Services.NameRules;
-using ApplicationPatcher.Wpf.Services.NameRules.Specific;
+using ApplicationPatcher.Wpf.Tests.Helpers;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -23,16 +23,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 				CommandCanExecuteMethodNameRules = new Configurations.NameRules { Prefix = "CanExecute", Suffix = "Method", Type = NameRulesType.UpperCamelCase }
 			};
 
-			var specificNameRulesServices =
-				new SpecificNameRulesService[] {
-					new AllLowerNameRules(),
-					new AllUpperNameRules(),
-					new FirstUpperNameRules(),
-					new LowerCamelCaseNameRules(),
-					new UpperCamelCaseNameRules()
-				};
-
-			nameRulesService = new NameRulesService(applicationPatcherWpfConfiguration, specificNameRulesServices);
+			nameRulesService = NameRulesServiceHelper.CreateService(applicationPatcherWpfConfiguration);
 		}
 
 

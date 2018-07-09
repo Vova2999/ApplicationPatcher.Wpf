@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
 <ApplicationPatcherWpfConfiguration>
+	<FieldNameRules Type="lowerCamelCase" />
+	<PropertyNameRules Type="UpperCamelCase" />
+	<CommandFieldNameRules Suffix="Command" Type="lowerCamelCase" />
+	<CommandPropertyNameRules Suffix="Command" Type="UpperCamelCase" />
+	<CommandExecuteMethodNameRules Prefix="Execute" Suffix="Method" Type="UpperCamelCase" />
+	<CommandCanExecuteMethodNameRules Prefix="CanExecute" Suffix="Method" Type="UpperCamelCase" />
+	<SkipConnectingByNameIfNameIsInvalid>false</SkipConnectingByNameIfNameIsInvalid>
+	<ConnectByNameIfExsistConnectAttribute>false</ConnectByNameIfExsistConnectAttribute>
 	<DefaultViewModelPatchingType>All</DefaultViewModelPatchingType>
 </ApplicationPatcherWpfConfiguration>

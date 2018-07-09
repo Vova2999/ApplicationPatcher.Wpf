@@ -89,12 +89,13 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 				throw new PropertyPatchingException(errorsService);
 		}
 
-		private static CommonProperty[] GetPatchingProperties(IHasProperties viewModelType, IHasType commandType, ViewModelPatchingType patchingType) {
+		private CommonProperty[] GetPatchingProperties(IHasProperties viewModelType, IHasType commandType, ViewModelPatchingType patchingType) {
 			return viewModelType.Properties
-				.Where(property => property.NotContainsAttribute<NotPatchingPropertyAttribute>() && (
-					patchingType == ViewModelPatchingType.All && property.IsNotInheritedFrom(commandType) ||
-					property.ContainsAttribute<PatchingPropertyAttribute>() ||
-					property.ContainsAttribute<ConnectPropertyToFieldAttribute>()))
+				.Where(property => property.NotContainsAttribute<NotPatchingPropertyAttribute>() &&
+					(!applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid || nameRulesService.IsNameValid(property.Name, UseNameRulesFor.Property)) && (
+						patchingType == ViewModelPatchingType.All && property.IsNotInheritedFrom(commandType) ||
+						property.ContainsAttribute<PatchingPropertyAttribute>() ||
+						property.ContainsAttribute<ConnectPropertyToFieldAttribute>()))
 				.ToArray();
 		}
 
