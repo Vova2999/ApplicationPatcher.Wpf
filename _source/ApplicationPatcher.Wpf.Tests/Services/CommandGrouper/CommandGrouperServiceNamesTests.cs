@@ -148,5 +148,19 @@ namespace ApplicationPatcher.Wpf.Tests.Services.CommandGrouper {
 			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (executeMethodName, canExecuteMethodName, propertyName, fieldName));
 			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
 		}
+
+		[Test]
+		public void HaveExecuteMethodAndFieldWithoutProperty() {
+			const string fieldName = "anyActionCommand";
+			const string executeMethodName = "ExecuteAnyActionMethod";
+
+			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
+				.AddField(fieldName, CommandType.Type)
+				.AddMethod(executeMethodName, typeof(void), null)
+				.Build();
+
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (executeMethodName, null, null, fieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+		}
 	}
 }

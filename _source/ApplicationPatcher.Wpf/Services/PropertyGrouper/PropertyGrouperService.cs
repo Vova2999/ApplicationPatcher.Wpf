@@ -20,8 +20,8 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 			this.nameRulesService = nameRulesService;
 		}
 
-		public PropertyGroup[] GetGroups(IHasTypes commonAssembly, CommonType viewModelType, ViewModelPatchingType patchingType) {
-			var commandType = commonAssembly.GetCommonType(KnownTypeNames.ICommand, true);
+		public PropertyGroup[] GetGroups(CommonAssembly assembly, CommonType viewModelType, ViewModelPatchingType patchingType) {
+			var commandType = assembly.GetCommonType(KnownTypeNames.ICommand, true);
 			CheckViewModel(commandType, viewModelType);
 
 			var patchingProperties = GetPatchingProperties(viewModelType, commandType, patchingType);
@@ -123,6 +123,9 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 
 			return patchingPropertyGroups;
 		}
+		private static (CommonProperty Property, List<CommonField> Fields) CreateEmptyPatchingPropertyGroup(CommonProperty property) {
+			return (property, new List<CommonField>());
+		}
 		private void AddGroupsByPropertyName(ICollection<(CommonProperty Property, List<CommonField> Fields)> patchingPropertyGroups, IHasFields viewModelType) {
 			var propertiesWithUseSearchByName = patchingPropertyGroups.Select(group => group.Property)
 				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
@@ -145,9 +148,6 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 				foreach (var property in field.GetReflectionAttributes<ConnectFieldToPropertyAttribute>().Select(attribute => viewModelType.GetProperty(attribute.ConnectingPropertyName, true)))
 					patchingPropertyGroups.GetOrAdd(group => group.Property == property, () => CreateEmptyPatchingPropertyGroup(property)).Fields.AddIfNotContains(field);
 			}
-		}
-		private static (CommonProperty Property, List<CommonField> Fields) CreateEmptyPatchingPropertyGroup(CommonProperty property) {
-			return (property, new List<CommonField>());
 		}
 
 		private static void CheckPatchingPropertyGroups(IReadOnlyCollection<(CommonProperty Property, List<CommonField> Fields)> patchingPropertyGroups) {

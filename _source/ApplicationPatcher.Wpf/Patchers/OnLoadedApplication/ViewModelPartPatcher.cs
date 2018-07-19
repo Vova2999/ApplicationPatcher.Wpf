@@ -3,9 +3,9 @@ using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Types.Enums;
 
-namespace ApplicationPatcher.Wpf.Patchers {
+namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 	public abstract class ViewModelPartPatcher {
 		[AddLogOffset]
-		public abstract PatchResult Patch(CommonAssembly commonAssembly, CommonType viewModelBaseType, CommonType viewModelType, ViewModelPatchingType patchingType);
+		public abstract PatchResult Patch(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType, ViewModelPatchingType patchingType);
 	}
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Logs;
 using Ninject;

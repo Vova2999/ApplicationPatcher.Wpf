@@ -3,7 +3,7 @@
 
 	public static class KnownTypeNames {
 		public const string ICommand = "System.Windows.Input.ICommand";
-		public const string RelayCommand = "GalaSoft.MvvmLight.Command.RelayCommand";
+		public const string RelayCommand = "GalaSoft.MvvmLight.CommandWpf.RelayCommand";
 		public const string ViewModelBase = "GalaSoft.MvvmLight.ViewModelBase";
 	}
 }

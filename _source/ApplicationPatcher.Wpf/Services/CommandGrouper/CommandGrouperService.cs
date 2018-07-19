@@ -21,8 +21,8 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 			this.nameRulesService = nameRulesService;
 		}
 
-		public CommandGroup[] GetGroups(IHasTypes commonAssembly, CommonType viewModelType, ViewModelPatchingType patchingType) {
-			var commandType = commonAssembly.GetCommonType(KnownTypeNames.ICommand, true);
+		public CommandGroup[] GetGroups(CommonAssembly assembly, CommonType viewModelType, ViewModelPatchingType patchingType) {
+			var commandType = assembly.GetCommonType(KnownTypeNames.ICommand, true);
 			CheckViewModel(commandType, viewModelType);
 
 			var patchingMethods = GetPatchingMethods(viewModelType, patchingType);
@@ -252,10 +252,15 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 			CheckPatchingPropertyNames(patchingCommandGroups.SelectMany(group => group.Properties));
 
 			FillGroupsByPropertyName(patchingCommandGroups, viewModelType, commandType);
-			FillGroupsFromConnectPropertyToFieldAttribute(patchingCommandGroups, viewModelType, commandType);
+			FillGroupsFromConnectPropertyToFieldAttribute(patchingCommandGroups, viewModelType);
 			FillGroupsFromConnectFieldToPropertyAttribute(patchingCommandGroups, viewModelType, commandType);
 
+			FillGroupsWithoutProperty(patchingCommandGroups, viewModelType);
+
 			return patchingCommandGroups;
+		}
+		private static (CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields) CreateEmptyPatchingCommandGroup(CommonMethod executeMethod) {
+			return (executeMethod, new List<CommonMethod>(), new List<CommonProperty>(), new List<CommonField>());
 		}
 		private void AddGroupsByCommandName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType) {
 			var methodsWithUseSearchByName = patchingCommandGroups.Select(group => group.ExecuteMethod)
@@ -349,7 +354,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					fields.AddIfNotContains(foundField);
 			}
 		}
-		private static void FillGroupsFromConnectPropertyToFieldAttribute(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType, IHasType commandType) {
+		private static void FillGroupsFromConnectPropertyToFieldAttribute(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, IHasFields viewModelType) {
 			foreach (var property in patchingCommandGroups.SelectMany(group => group.Properties)) {
 				var foundFields = property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>().Select(attribute => viewModelType.GetField(attribute.ConnectingFieldName, true)).ToArray();
 				if (!foundFields.Any())
@@ -369,8 +374,13 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					fields.AddIfNotContains(field);
 			}
 		}
-		private static (CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields) CreateEmptyPatchingCommandGroup(CommonMethod executeMethod) {
-			return (executeMethod, new List<CommonMethod>(), new List<CommonProperty>(), new List<CommonField>());
+
+		private void FillGroupsWithoutProperty(IEnumerable<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType) {
+			foreach (var (executeMethod, _, _, fields) in patchingCommandGroups.Where(group => !group.Properties.Any())) {
+				var fieldName = nameRulesService.ConvertName(executeMethod.Name, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandField);
+				if (viewModelType.TryGetField(fieldName, out var field))
+					fields.AddIfNotContains(field);
+			}
 		}
 
 		private void CheckPatchingCommandGroups(IReadOnlyCollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups) {
