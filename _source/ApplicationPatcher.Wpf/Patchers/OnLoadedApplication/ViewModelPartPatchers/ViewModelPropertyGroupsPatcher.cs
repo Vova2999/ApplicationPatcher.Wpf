@@ -4,14 +4,17 @@ using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.Interfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Services.PropertyGrouper;
 using ApplicationPatcher.Wpf.Types.Enums;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatchers {
+	[UsedImplicitly]
 	public class ViewModelPropertyGroupsPatcher : ViewModelPartPatcher {
 		private readonly PropertyGrouperService propertyGrouperService;
 		private readonly NameRulesService nameRulesService;
@@ -45,7 +48,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 		}
 
 		[AddLogOffset]
-		private void PatchGroup(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType, PropertyGroup group) {
+		private void PatchGroup(CommonAssembly assembly, IHasMethods viewModelBaseType, CommonType viewModelType, PropertyGroup group) {
 			RemoveDefaultField(viewModelType, group.Property.Name);
 
 			var field = group.Field?.MonoCecil ?? CreateField(viewModelType, group.Property);
@@ -95,7 +98,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 
 			log.Info("Get method body was generated");
 		}
-		private void GenerateSetMethodBody(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType, PropertyDefinition property, FieldReference field) {
+		private void GenerateSetMethodBody(CommonAssembly assembly, IHasMethods viewModelBaseType, CommonType viewModelType, PropertyDefinition property, FieldReference field) {
 			log.Info("Generate set method body...");
 
 			if (property.SetMethod == null) {

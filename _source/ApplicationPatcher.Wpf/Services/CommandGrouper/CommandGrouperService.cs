@@ -240,7 +240,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 				throw new CommandPatchingException(errorsService);
 		}
 
-		private List<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> GetPatchingCommandGroups(IEnumerable<CommonMethod> patchingMethods, CommonType viewModelType, CommonType commandType) {
+		private List<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> GetPatchingCommandGroups(IEnumerable<CommonMethod> patchingMethods, CommonType viewModelType, IHasType commandType) {
 			var patchingCommandGroups = patchingMethods.Select(CreateEmptyPatchingCommandGroup).ToList();
 
 			AddGroupsByCommandName(patchingCommandGroups, viewModelType);
@@ -337,7 +337,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 				throw new CommandPatchingException(errorsService);
 		}
 
-		private void FillGroupsByPropertyName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType, IHasType commandType) {
+		private void FillGroupsByPropertyName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, IHasFields viewModelType, IHasType commandType) {
 			var propertiesWithUseSearchByName = patchingCommandGroups.SelectMany(group => group.Properties)
 				.Where(property => property.IsInheritedFrom(commandType) && property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
 					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()))
@@ -375,7 +375,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 			}
 		}
 
-		private void FillGroupsWithoutProperty(IEnumerable<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType) {
+		private void FillGroupsWithoutProperty(IEnumerable<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, IHasFields viewModelType) {
 			foreach (var (executeMethod, _, _, fields) in patchingCommandGroups.Where(group => !group.Properties.Any())) {
 				var fieldName = nameRulesService.ConvertName(executeMethod.Name, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandField);
 				if (viewModelType.TryGetField(fieldName, out var field))

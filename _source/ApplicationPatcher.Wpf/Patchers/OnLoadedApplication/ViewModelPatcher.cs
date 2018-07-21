@@ -7,8 +7,10 @@ using ApplicationPatcher.Core.Patchers;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Types.Attributes;
+using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
+	[UsedImplicitly]
 	public class ViewModelPatcher : PatcherOnLoadedApplication {
 		private readonly ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;
 		private readonly ViewModelPartPatcher[] viewModelPartPatchers;
@@ -43,15 +45,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			foreach (var viewModelType in patchingViewModelTypes) {
 				log.Info($"Patching type '{viewModelType.FullName}'...");
 
-				log.Info($"Loading type '{viewModelType.FullName}'...");
-				viewModelType.Load();
-				log.Info($"Type '{viewModelType.FullName}' was loaded");
-
-				var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.ViewModelPatchingType ?? applicationPatcherWpfConfiguration.DefaultViewModelPatchingType;
-				log.Info($"View model patching type: '{patchingType}'");
-
-				var patchResult = PatchHelper.PatchApplication(viewModelPartPatchers, patcher => patcher.Patch(assembly, viewModelBaseType, viewModelType, patchingType), log);
-				if (patchResult == PatchResult.Cancel)
+				if (PatchViewModel(assembly, viewModelBaseType, viewModelType) == PatchResult.Cancel)
 					return PatchResult.Cancel;
 
 				log.Info($"Type '{viewModelType.FullName}' was patched");
@@ -59,6 +53,18 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 
 			log.Info("View model types was patched");
 			return PatchResult.Continue;
+		}
+
+		[AddLogOffset]
+		private PatchResult PatchViewModel(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType) {
+			log.Info($"Loading type '{viewModelType.FullName}'...");
+			viewModelType.Load();
+			log.Info($"Type '{viewModelType.FullName}' was loaded");
+
+			var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.ViewModelPatchingType ?? applicationPatcherWpfConfiguration.DefaultViewModelPatchingType;
+			log.Info($"View model patching type: '{patchingType}'");
+
+			return PatchHelper.PatchApplication(viewModelPartPatchers, patcher => patcher.Patch(assembly, viewModelBaseType, viewModelType, patchingType), log);
 		}
 	}
 }

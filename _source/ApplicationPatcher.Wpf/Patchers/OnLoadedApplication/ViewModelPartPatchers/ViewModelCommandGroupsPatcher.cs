@@ -10,11 +10,13 @@ using ApplicationPatcher.Wpf.Helpers;
 using ApplicationPatcher.Wpf.Services.CommandGrouper;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Types.Enums;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatchers {
+	[UsedImplicitly]
 	public class ViewModelCommandGroupsPatcher : ViewModelPartPatcher {
 		private readonly CommandGrouperService commandGrouperService;
 		private readonly NameRulesService nameRulesService;

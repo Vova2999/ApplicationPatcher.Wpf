@@ -6,8 +6,10 @@ using ApplicationPatcher.Core.Patchers;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Types.Attributes;
+using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
+	[UsedImplicitly]
 	public class RemoveApplicationPatcherWpfAttributesPatcher : PatcherOnPatchedApplication {
 		private readonly ILog log;
 

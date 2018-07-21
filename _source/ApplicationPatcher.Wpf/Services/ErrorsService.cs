@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Services {
 	public class ErrorsService {
@@ -8,6 +9,7 @@ namespace ApplicationPatcher.Wpf.Services {
 
 		private readonly List<string> errors = new List<string>();
 
+		[UsedImplicitly]
 		public ErrorsService AddError(string errorMessage) {
 			errors.Add(errorMessage);
 			return this;
