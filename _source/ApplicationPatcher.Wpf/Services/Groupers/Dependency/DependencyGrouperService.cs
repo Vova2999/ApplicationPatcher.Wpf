@@ -6,7 +6,6 @@ using ApplicationPatcher.Core.Types.Interfaces;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Extensions;
-using ApplicationPatcher.Wpf.Services.Groupers.Property;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement;
@@ -22,7 +21,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 			this.nameRulesService = nameRulesService;
 		}
 
-		public PropertyGroup[] GetGroups(CommonAssembly assembly, CommonType frameworkElementType, FrameworkElementPatchingType patchingType) {
+		public DependencyGroup[] GetGroups(CommonAssembly assembly, CommonType frameworkElementType, FrameworkElementPatchingType patchingType) {
 			var dependencyPropertyType = assembly.GetCommonType(KnownTypeNames.DependencyProperty, true);
 			CheckFrameworkElement(frameworkElementType, dependencyPropertyType);
 
@@ -32,7 +31,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 			var patchingDependencyGroups = GetPatchingDependencyGroups(patchingProperties, frameworkElementType);
 			CheckPatchingPropertyGroups(patchingDependencyGroups, dependencyPropertyType);
 
-			return patchingDependencyGroups.Select(group => new PropertyGroup(group.Fields.SingleOrDefault(), group.Property)).ToArray();
+			return patchingDependencyGroups.Select(group => new DependencyGroup(group.Fields.SingleOrDefault(), group.Property)).ToArray();
 		}
 
 		private static void CheckFrameworkElement(CommonType frameworkElementType, CommonType dependencyPropertyType) {

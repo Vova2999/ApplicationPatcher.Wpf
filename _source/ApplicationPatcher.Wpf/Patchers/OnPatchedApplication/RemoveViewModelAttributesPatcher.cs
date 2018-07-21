@@ -11,19 +11,19 @@ using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 	[UsedImplicitly]
-	public class RemoveApplicationPatcherWpfAttributesPatcher : PatcherOnPatchedApplication {
+	public class RemoveViewModelAttributesPatcher : PatcherOnPatchedApplication {
 		private readonly ILog log;
 
-		public RemoveApplicationPatcherWpfAttributesPatcher() {
+		public RemoveViewModelAttributesPatcher() {
 			log = Log.For(this);
 		}
 
 		public override PatchResult Patch(CommonAssembly assembly) {
-			log.Info("Remove application patcher wpf attributes...");
+			log.Info("Remove view model attributes...");
 
 			RemoveAttributesFromViewModels(assembly);
 
-			log.Info("Application patcher wpf attributes was removed");
+			log.Info("View model attributes was removed");
 			return PatchResult.Continue;
 		}
 

@@ -7,9 +7,9 @@ using ApplicationPatcher.Wpf.Types.Attributes;
 using JetBrains.Annotations;
 using Mono.Cecil;
 
-namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
+namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 	[UsedImplicitly]
-	public class AddAssemblyPatchedAttributePatcher : PatcherOnLoadedApplication {
+	public class AddAssemblyPatchedAttributePatcher : PatcherOnPatchedApplication {
 		private readonly ILog log;
 
 		public AddAssemblyPatchedAttributePatcher() {

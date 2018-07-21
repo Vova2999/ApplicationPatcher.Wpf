@@ -33,13 +33,10 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 				?? applicationPatcherWpfConfiguration.DefaultFrameworkElementSelectingType;
 			log.Info($"Framework element selecting type: '{selectingType}'");
 
-			var windowBaseType = assembly.GetCommonType(KnownTypeNames.Window, true);
 			var frameworkElementBaseType = assembly.GetCommonType(KnownTypeNames.FrameworkElement, true);
 			CheckAssembly(assembly, frameworkElementBaseType);
 
-			var frameworkElementTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(frameworkElementBaseType)
-				.Where(frameworkElementType => frameworkElementType.IsNotInheritedFrom(windowBaseType))
-				.ToArray();
+			var frameworkElementTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(frameworkElementBaseType).ToArray();
 
 			if (!frameworkElementTypes.Any()) {
 				log.Info("Not found framework element types");
