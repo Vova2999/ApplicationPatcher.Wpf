@@ -5,33 +5,33 @@ using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Tests;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
-using ApplicationPatcher.Wpf.Services.PropertyGrouper;
+using ApplicationPatcher.Wpf.Services.Groupers.Dependency;
 using ApplicationPatcher.Wpf.Tests.Helpers;
 using ApplicationPatcher.Wpf.Types.Enums;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace ApplicationPatcher.Wpf.Tests.Services {
+namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 	[TestFixture]
-	public abstract class PropertyGrouperServiceTestsBase {
+	public abstract class DependencyGrouperServiceTestsBase {
 		private ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;
 		private FakeCommonAssemblyBuilder fakeCommonAssemblyBuilder;
-		private PropertyGrouperService propertyGrouperService;
+		private DependencyGrouperService dependencyGrouperService;
 
-		protected CommonType CommandType;
+		protected CommonType DependencyPropertyType;
 
 		[OneTimeSetUp]
 		public void OneTimeSetUp() {
 			applicationPatcherWpfConfiguration = new ApplicationPatcherWpfConfiguration {
-				FieldNameRules = new Configurations.NameRules { Type = NameRulesType.lowerCamelCase },
-				PropertyNameRules = new Configurations.NameRules { Type = NameRulesType.UpperCamelCase }
+				DependencyFieldNameRules = new Configurations.NameRules { Suffix = "Property", Type = NameRulesType.UpperCamelCase },
+				DependencyPropertyNameRules = new Configurations.NameRules { Type = NameRulesType.UpperCamelCase }
 			};
 
 			var nameRulesService = NameRulesServiceHelper.CreateService(applicationPatcherWpfConfiguration);
-			propertyGrouperService = new PropertyGrouperService(applicationPatcherWpfConfiguration, nameRulesService);
+			dependencyGrouperService = new DependencyGrouperService(applicationPatcherWpfConfiguration, nameRulesService);
 
-			CommandType = FakeCommonTypeBuilder.Create(KnownTypeNames.ICommand).Build();
-			fakeCommonAssemblyBuilder = FakeCommonAssemblyBuilder.Create().AddCommonType(CommandType, false);
+			DependencyPropertyType = FakeCommonTypeBuilder.Create(KnownTypeNames.DependencyProperty).Build();
+			fakeCommonAssemblyBuilder = FakeCommonAssemblyBuilder.Create().AddCommonType(DependencyPropertyType, false);
 			FakeCommonTypeBuilder.ClearCreatedTypes();
 		}
 
@@ -40,14 +40,18 @@ namespace ApplicationPatcher.Wpf.Tests.Services {
 			FakeCommonTypeBuilder.ClearCreatedTypes();
 		}
 
-		protected void CheckValidViewModel(CommonType viewModelType,
-										   ViewModelPatchingType viewModelPatchingType,
-										   bool skipConnectingByNameIfNameIsInvalid,
-										   bool connectByNameIfExsistConnectAttribute,
-										   params (string PropertyName, string FieldName)[] expectedGroups) {
+		protected static void SetStaticField(CommonType frameworkElementType, string patchingFieldName) {
+			FakeCommonTypeBuilder.GetMockFor(frameworkElementType.GetField(patchingFieldName, true).MonoCecil).Setup(field => field.IsStatic).Returns(true);
+		}
+
+		protected void CheckValidFrameworkElement(CommonType frameworkElementType,
+												  FrameworkElementPatchingType frameworkElementPatchingType,
+												  bool skipConnectingByNameIfNameIsInvalid,
+												  bool connectByNameIfExsistConnectAttribute,
+												  params (string PropertyName, string FieldName)[] expectedGroups) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
 			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
-			var groups = propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
+			var groups = dependencyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, frameworkElementType, frameworkElementPatchingType);
 
 			if (groups.Any())
 				Console.WriteLine(groups.Select((group, i) => $"{i}) " +
@@ -73,19 +77,19 @@ namespace ApplicationPatcher.Wpf.Tests.Services {
 				actualName.Should().Be(expectedName);
 		}
 
-		protected void CheckInvalidViewModel(CommonType viewModelType,
-											 ViewModelPatchingType viewModelPatchingType,
-											 string errorMessage,
-											 bool skipConnectingByNameIfNameIsInvalid = false,
-											 bool connectByNameIfExsistConnectAttribute = false) {
+		protected void CheckInvalidFrameworkElement(CommonType frameworkElementType,
+													FrameworkElementPatchingType frameworkElementPatchingType,
+													string errorMessage,
+													bool skipConnectingByNameIfNameIsInvalid = false,
+													bool connectByNameIfExsistConnectAttribute = false) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
 			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
 
 			try {
-				propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
-				Assert.Fail($"Expected a '{nameof(ViewModelPropertyPatchingException)}' to be thrown, but no exception was thrown");
+				dependencyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, frameworkElementType, frameworkElementPatchingType);
+				Assert.Fail($"Expected a '{nameof(FrameworkElementDependencyPatchingException)}' to be thrown, but no exception was thrown");
 			}
-			catch (ViewModelPropertyPatchingException exception) {
+			catch (FrameworkElementDependencyPatchingException exception) {
 				Console.WriteLine(exception.Message);
 				Console.WriteLine();
 

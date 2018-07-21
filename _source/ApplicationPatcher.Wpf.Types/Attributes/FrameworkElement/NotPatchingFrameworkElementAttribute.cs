@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public class NotPatchingFrameworkElementAttribute : Attribute {
 	}
 }

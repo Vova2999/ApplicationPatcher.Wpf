@@ -11,7 +11,7 @@ using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 
-namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
+namespace ApplicationPatcher.Wpf.Services.Groupers.Property {
 	public class PropertyGrouperService {
 		private readonly ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;
 		private readonly NameRulesService nameRulesService;

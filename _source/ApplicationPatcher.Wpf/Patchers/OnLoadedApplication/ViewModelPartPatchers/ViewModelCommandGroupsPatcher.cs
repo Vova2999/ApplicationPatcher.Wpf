@@ -7,7 +7,7 @@ using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Helpers;
-using ApplicationPatcher.Wpf.Services.CommandGrouper;
+using ApplicationPatcher.Wpf.Services.Groupers.Command;
 using ApplicationPatcher.Wpf.Services.NameRules;
 using ApplicationPatcher.Wpf.Types.Enums;
 using JetBrains.Annotations;

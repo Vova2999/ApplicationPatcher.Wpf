@@ -4,7 +4,7 @@ using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 
-namespace ApplicationPatcher.Wpf.Tests.Services.PropertyGrouper {
+namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 	[TestFixture]
 	public class PropertyGrouperServiceNamesTests : PropertyGrouperServiceTestsBase {
 		[Test]

@@ -5,6 +5,8 @@
 	<PropertyNameRules Type="UpperCamelCase" />
 	<CommandFieldNameRules Suffix="Command" Type="lowerCamelCase" />
 	<CommandPropertyNameRules Suffix="Command" Type="UpperCamelCase" />
+	<DependencyFieldNameRules Suffix="Property" Type="UpperCamelCase" />
+	<DependencyPropertyNameRules Type="UpperCamelCase" />
 	<CommandExecuteMethodNameRules Prefix="Execute" Suffix="Method" Type="UpperCamelCase" />
 	<CommandCanExecuteMethodNameRules Prefix="CanExecute" Suffix="Method" Type="UpperCamelCase" />
 	<SkipConnectingByNameIfNameIsInvalid>false</SkipConnectingByNameIfNameIsInvalid>

@@ -76,6 +76,7 @@
     <Compile Include="ApplicationPatcherWpfNinjectModule.cs" />
     <Compile Include="Configurations\NameRules.cs" />
     <Compile Include="Configurations\NameRulesType.cs" />
+    <Compile Include="Exceptions\FrameworkElementDependencyPatchingException.cs" />
     <Compile Include="Exceptions\ViewModelCommandPatchingException.cs" />
     <Compile Include="Exceptions\FrameworkElementPatchingException.cs" />
     <Compile Include="Exceptions\ViewModelPropertyPatchingException.cs" />
@@ -88,7 +89,7 @@
     <Compile Include="KnownTypeNames.cs" />
     <Compile Include="Patchers\OnLoadedApplication\AddAssemblyPatchedAttributePatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPartPatcher.cs" />
-    <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPartPatchers\FrameworkElementPropertiesPatcher.cs" />
+    <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPartPatchers\FrameworkElementDependencyPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatchers\ViewModelCommandGroupsPatcher.cs" />
@@ -98,9 +99,11 @@
     <Compile Include="Patchers\OnPatchedApplication\RemoveApplicationPatcherWpfAttributesPatcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\CommandGrouper\CommandGroup.cs" />
-    <Compile Include="Services\CommandGrouper\CommandGrouperService.cs" />
+    <Compile Include="Services\Groupers\Command\CommandGroup.cs" />
+    <Compile Include="Services\Groupers\Command\CommandGrouperService.cs" />
     <Compile Include="Services\ErrorsService.cs" />
+    <Compile Include="Services\Groupers\Dependency\DependencyGroup.cs" />
+    <Compile Include="Services\Groupers\Dependency\DependencyGrouperService.cs" />
     <Compile Include="Services\NameRules\NameRulesService.cs" />
     <Compile Include="Services\NameRules\SpecificNameRulesService.cs" />
     <Compile Include="Services\NameRules\Specific\AllLowerNameRules.cs" />
@@ -109,8 +112,8 @@
     <Compile Include="Services\NameRules\Specific\LowerCamelCaseNameRules.cs" />
     <Compile Include="Services\NameRules\Specific\UpperCamelCaseNameRules.cs" />
     <Compile Include="Services\NameRules\UseNameRulesFor.cs" />
-    <Compile Include="Services\PropertyGrouper\PropertyGroup.cs" />
-    <Compile Include="Services\PropertyGrouper\PropertyGrouperService.cs" />
+    <Compile Include="Services\Groupers\Property\PropertyGroup.cs" />
+    <Compile Include="Services\Groupers\Property\PropertyGrouperService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

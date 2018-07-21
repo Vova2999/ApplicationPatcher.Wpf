@@ -38,6 +38,10 @@ namespace ApplicationPatcher.Wpf.Services.NameRules {
 					return applicationPatcherWpfConfiguration.CommandFieldNameRules;
 				case UseNameRulesFor.CommandProperty:
 					return applicationPatcherWpfConfiguration.CommandPropertyNameRules;
+				case UseNameRulesFor.DependencyField:
+					return applicationPatcherWpfConfiguration.DependencyFieldNameRules;
+				case UseNameRulesFor.DependencyProperty:
+					return applicationPatcherWpfConfiguration.DependencyPropertyNameRules;
 				case UseNameRulesFor.CommandExecuteMethod:
 					return applicationPatcherWpfConfiguration.CommandExecuteMethodNameRules;
 				case UseNameRulesFor.CommandCanExecuteMethod:

@@ -2,7 +2,7 @@
 using ApplicationPatcher.Wpf.Types.Enums;
 
 namespace ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public class PatchingFrameworkElementAttribute : Attribute {
 		public readonly FrameworkElementPatchingType PatchingType;
 

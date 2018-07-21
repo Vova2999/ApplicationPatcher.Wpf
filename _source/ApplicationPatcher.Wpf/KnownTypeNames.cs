@@ -7,5 +7,6 @@
 		public const string RelayCommand = "GalaSoft.MvvmLight.CommandWpf.RelayCommand";
 		public const string ViewModelBase = "GalaSoft.MvvmLight.ViewModelBase";
 		public const string FrameworkElement = "System.Windows.FrameworkElement";
+		public const string DependencyProperty = "System.Windows.DependencyProperty";
 	}
 }

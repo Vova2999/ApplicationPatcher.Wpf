@@ -4,7 +4,7 @@ using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 
-namespace ApplicationPatcher.Wpf.Tests.Services.CommandGrouper {
+namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 	[TestFixture]
 	public class CommandGrouperServiceNamesTests : CommandGrouperServiceTestsBase {
 		[Test]

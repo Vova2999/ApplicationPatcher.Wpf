@@ -12,7 +12,7 @@ using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 
-namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
+namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 	public class CommandGrouperService {
 		private readonly ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;
 		private readonly NameRulesService nameRulesService;

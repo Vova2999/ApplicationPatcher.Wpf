@@ -1,6 +1,6 @@
 ﻿using ApplicationPatcher.Core.Types.CommonMembers;
 
-namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
+namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 	public class CommandGroup {
 		public readonly CommonField CommandField;
 		public readonly CommonProperty CommandProperty;

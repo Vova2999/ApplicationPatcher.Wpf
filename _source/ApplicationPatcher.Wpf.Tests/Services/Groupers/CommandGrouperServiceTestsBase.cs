@@ -5,13 +5,13 @@ using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Tests;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
-using ApplicationPatcher.Wpf.Services.CommandGrouper;
+using ApplicationPatcher.Wpf.Services.Groupers.Command;
 using ApplicationPatcher.Wpf.Tests.Helpers;
 using ApplicationPatcher.Wpf.Types.Enums;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace ApplicationPatcher.Wpf.Tests.Services {
+namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 	[TestFixture]
 	public abstract class CommandGrouperServiceTestsBase {
 		private ApplicationPatcherWpfConfiguration applicationPatcherWpfConfiguration;

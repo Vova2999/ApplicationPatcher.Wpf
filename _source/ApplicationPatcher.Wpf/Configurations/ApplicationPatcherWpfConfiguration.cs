@@ -11,6 +11,8 @@ namespace ApplicationPatcher.Wpf.Configurations {
 		public NameRules PropertyNameRules { get; set; }
 		public NameRules CommandFieldNameRules { get; set; }
 		public NameRules CommandPropertyNameRules { get; set; }
+		public NameRules DependencyFieldNameRules { get; set; }
+		public NameRules DependencyPropertyNameRules { get; set; }
 		public NameRules CommandExecuteMethodNameRules { get; set; }
 		public NameRules CommandCanExecuteMethodNameRules { get; set; }
 		public bool SkipConnectingByNameIfNameIsInvalid { get; set; }

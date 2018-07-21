@@ -19,6 +19,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 				PropertyNameRules = new Configurations.NameRules { Type = NameRulesType.UpperCamelCase },
 				CommandFieldNameRules = new Configurations.NameRules { Suffix = "Command", Type = NameRulesType.lowerCamelCase },
 				CommandPropertyNameRules = new Configurations.NameRules { Suffix = "Command", Type = NameRulesType.UpperCamelCase },
+				DependencyFieldNameRules = new Configurations.NameRules { Suffix = "Property", Type = NameRulesType.UpperCamelCase },
+				DependencyPropertyNameRules = new Configurations.NameRules { Type = NameRulesType.UpperCamelCase },
 				CommandExecuteMethodNameRules = new Configurations.NameRules { Prefix = "Execute", Suffix = "Method", Type = NameRulesType.UpperCamelCase },
 				CommandCanExecuteMethodNameRules = new Configurations.NameRules { Prefix = "CanExecute", Suffix = "Method", Type = NameRulesType.UpperCamelCase }
 			};
@@ -49,6 +51,18 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		public void IsNameValid_InvalidNames_CommandPropertyName() {
 			var invalidNames = new[] { "anyActionCommand", "Any2AcCCtionCommand", "AnYaCtIonComand", "A11nYaCtIo11N" };
 			CheckInvalidNames(invalidNames, UseNameRulesFor.CommandProperty);
+		}
+
+		[Test]
+		public void IsNameValid_InvalidNames_DependencyFieldName() {
+			var invalidNames = new[] { "anyActionProperty", "anyActiOOonProperty", "anyACctionProperty", "a11nYaCtIo11N" };
+			CheckInvalidNames(invalidNames, UseNameRulesFor.DependencyField);
+		}
+
+		[Test]
+		public void IsNameValid_InvalidNames_DependencyPropertyName() {
+			var invalidNames = new[] { "anyActionProperty", "Any2AcCCtionProperty", "AnYaCtIonProertyYY", "A11nYaCtIo11NN" };
+			CheckInvalidNames(invalidNames, UseNameRulesFor.DependencyProperty);
 		}
 
 		[Test]
@@ -89,6 +103,18 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 		}
 
 		[Test]
+		public void IsNameValid_ValidNames_DependencyFieldName() {
+			var validNames = new[] { "AnyActionProperty", "Any2ActionProperty", "AnYaCtIonProperty", "A11nYaCtIo11NProperty" };
+			CheckValidNames(validNames, UseNameRulesFor.DependencyField);
+		}
+
+		[Test]
+		public void IsNameValid_ValidNames_DependencyPropertyName() {
+			var validNames = new[] { "AnyActionProperty", "Any2ActionCommand", "AnYaCtIonProperty", "A11nYaCtIo11nCommand" };
+			CheckValidNames(validNames, UseNameRulesFor.DependencyProperty);
+		}
+
+		[Test]
 		public void IsNameValid_ValidNames_CommandExecuteMethodName() {
 			var validNames = new[] { "ExecuteAnyActionMethod", "ExecuteAny2ActionMethod", "ExecuteAnYaCtIonMethod", "ExecuteA11nYaCtIo11nMethod" };
 			CheckValidNames(validNames, UseNameRulesFor.CommandExecuteMethod);
@@ -113,6 +139,20 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 			var names = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
 			var expectedNames = new[] { "anyAction", "any2Action", "anYaCtIon", "a11nYaCtIo11N" };
 			CheckConvertNames(names, UseNameRulesFor.Property, UseNameRulesFor.Field, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_DependencyFieldName_To_DependencyPropertyName() {
+			var names = new[] { "AnyActionProperty", "Any2ActionProperty", "AnYaCtIonProperty", "A11nYaCtIo11NProperty" };
+			var expectedNames = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
+			CheckConvertNames(names, UseNameRulesFor.DependencyField, UseNameRulesFor.DependencyProperty, expectedNames);
+		}
+
+		[Test]
+		public void ConvertName_DependencyPropertyName_To_DependencyFieldName() {
+			var names = new[] { "AnyAction", "Any2Action", "AnYaCtIon", "A11nYaCtIo11N" };
+			var expectedNames = new[] { "AnyActionProperty", "Any2ActionProperty", "AnYaCtIonProperty", "A11nYaCtIo11NProperty" };
+			CheckConvertNames(names, UseNameRulesFor.DependencyProperty, UseNameRulesFor.DependencyField, expectedNames);
 		}
 
 		[Test]

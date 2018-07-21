@@ -39,7 +39,9 @@
     <Compile Include="Attributes\AssemblyPatchedAttribute.cs" />
     <Compile Include="Attributes\FrameworkElement\ConnectDependencyToPropertyAttribute.cs" />
     <Compile Include="Attributes\FrameworkElement\ConnectPropertyToDependencyAttribute.cs" />
+    <Compile Include="Attributes\FrameworkElement\NotPatchingDependencyPropertyAttribute.cs" />
     <Compile Include="Attributes\FrameworkElement\NotPatchingFrameworkElementAttribute.cs" />
+    <Compile Include="Attributes\FrameworkElement\PatchingDependencyPropertyAttribute.cs" />
     <Compile Include="Attributes\FrameworkElement\PatchingFrameworkElementAttribute.cs" />
     <Compile Include="Attributes\SelectingFrameworkElementAttribute.cs" />
     <Compile Include="Attributes\SelectingViewModelAttribute.cs" />

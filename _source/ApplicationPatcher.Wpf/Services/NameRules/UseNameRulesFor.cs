@@ -4,6 +4,8 @@
 		Property,
 		CommandField,
 		CommandProperty,
+		DependencyField,
+		DependencyProperty,
 		CommandExecuteMethod,
 		CommandCanExecuteMethod
 	}
