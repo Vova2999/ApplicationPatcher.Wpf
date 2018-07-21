@@ -84,10 +84,12 @@
     <Compile Include="Extensions\MatchExtensions.cs" />
     <Compile Include="Helpers\ExtendedLazy.cs" />
     <Compile Include="KnownTypeNames.cs" />
+    <Compile Include="Patchers\OnLoadedApplication\AddAssemblyPatchedAttributePatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatchers\ViewModelCommandGroupsPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatchers\ViewModelPropertyGroupsPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPatcher.cs" />
+    <Compile Include="Patchers\OnNotLoadedApplication\CheckAssemblyPatchedAttributePatcher.cs" />
     <Compile Include="Patchers\OnPatchedApplication\RemoveApplicationPatcherWpfAttributesPatcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

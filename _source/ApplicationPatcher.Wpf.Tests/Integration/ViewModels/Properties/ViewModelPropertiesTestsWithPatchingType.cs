@@ -1,4 +1,4 @@
-﻿using ApplicationPatcher.Wpf.Types.Attributes;
+﻿using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 using FluentAssertions;
 using GalaSoft.MvvmLight;
