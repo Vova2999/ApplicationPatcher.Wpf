@@ -8,6 +8,7 @@ using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules;
+using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 
@@ -211,7 +212,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 						$"connection in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{x.Field.Name}'"));
 
 			if (errorsService.HasErrors)
-				throw new CommandPatchingException(errorsService);
+				throw new ViewModelCommandPatchingException(errorsService);
 		}
 
 		private CommonMethod[] GetPatchingMethods(IHasMethods viewModelType, ViewModelPatchingType patchingType) {
@@ -237,7 +238,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					.Select(method => $"Not valid patching command method name '{method.Name}'"));
 
 			if (errorsService.HasErrors)
-				throw new CommandPatchingException(errorsService);
+				throw new ViewModelCommandPatchingException(errorsService);
 		}
 
 		private List<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> GetPatchingCommandGroups(IEnumerable<CommonMethod> patchingMethods, CommonType viewModelType, IHasType commandType) {
@@ -334,7 +335,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					.Select(method => $"Not valid patching command property name '{method.Name}'"));
 
 			if (errorsService.HasErrors)
-				throw new CommandPatchingException(errorsService);
+				throw new ViewModelCommandPatchingException(errorsService);
 		}
 
 		private void FillGroupsByPropertyName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, IHasFields viewModelType, IHasType commandType) {
@@ -422,7 +423,7 @@ namespace ApplicationPatcher.Wpf.Services.CommandGrouper {
 					.Select(group => $"Not found field for property '{group.Properties.Single().Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"));
 
 			if (errorsService.HasErrors)
-				throw new CommandPatchingException(errorsService);
+				throw new ViewModelCommandPatchingException(errorsService);
 		}
 	}
 }

@@ -76,8 +76,10 @@
     <Compile Include="ApplicationPatcherWpfNinjectModule.cs" />
     <Compile Include="Configurations\NameRules.cs" />
     <Compile Include="Configurations\NameRulesType.cs" />
-    <Compile Include="Exceptions\CommandPatchingException.cs" />
-    <Compile Include="Exceptions\PropertyPatchingException.cs" />
+    <Compile Include="Exceptions\ViewModelCommandPatchingException.cs" />
+    <Compile Include="Exceptions\FrameworkElementPatchingException.cs" />
+    <Compile Include="Exceptions\ViewModelPropertyPatchingException.cs" />
+    <Compile Include="Exceptions\ViewModelPatchingException.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\CustomAttributeProviderExtensions.cs" />
@@ -85,6 +87,9 @@
     <Compile Include="Helpers\ExtendedLazy.cs" />
     <Compile Include="KnownTypeNames.cs" />
     <Compile Include="Patchers\OnLoadedApplication\AddAssemblyPatchedAttributePatcher.cs" />
+    <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPartPatcher.cs" />
+    <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPartPatchers\FrameworkElementPropertiesPatcher.cs" />
+    <Compile Include="Patchers\OnLoadedApplication\FrameworkElementPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatchers\ViewModelCommandGroupsPatcher.cs" />
     <Compile Include="Patchers\OnLoadedApplication\ViewModelPartPatchers\ViewModelPropertyGroupsPatcher.cs" />

@@ -91,9 +91,9 @@ namespace ApplicationPatcher.Wpf.Tests.Services {
 
 			try {
 				commandGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
-				Assert.Fail($"Expected a '{nameof(CommandPatchingException)}' to be thrown, but no exception was thrown");
+				Assert.Fail($"Expected a '{nameof(ViewModelCommandPatchingException)}' to be thrown, but no exception was thrown");
 			}
-			catch (CommandPatchingException exception) {
+			catch (ViewModelCommandPatchingException exception) {
 				Console.WriteLine(exception.Message);
 				Console.WriteLine();
 

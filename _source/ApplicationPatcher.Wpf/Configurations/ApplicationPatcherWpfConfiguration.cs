@@ -16,5 +16,8 @@ namespace ApplicationPatcher.Wpf.Configurations {
 		public bool SkipConnectingByNameIfNameIsInvalid { get; set; }
 		public bool ConnectByNameIfExsistConnectAttribute { get; set; }
 		public ViewModelPatchingType DefaultViewModelPatchingType { get; set; }
+		public ViewModelSelectingType DefaultViewModelSelectingType { get; set; }
+		public FrameworkElementPatchingType DefaultFrameworkElementPatchingType { get; set; }
+		public FrameworkElementSelectingType DefaultFrameworkElementSelectingType { get; set; }
 	}
 }

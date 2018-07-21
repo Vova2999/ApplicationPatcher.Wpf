@@ -6,7 +6,11 @@ using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Configurations;
+using ApplicationPatcher.Wpf.Exceptions;
+using ApplicationPatcher.Wpf.Services;
+using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
+using ApplicationPatcher.Wpf.Types.Enums;
 using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
@@ -24,7 +28,13 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 
 		public override PatchResult Patch(CommonAssembly assembly) {
 			log.Info("Patching view model types...");
+
+			var selectingType = assembly.GetReflectionAttribute<SelectingViewModelAttribute>()?.SelectingType
+				?? applicationPatcherWpfConfiguration.DefaultViewModelSelectingType;
+			log.Info($"View model selecting type: '{selectingType}'");
+
 			var viewModelBaseType = assembly.GetCommonType(KnownTypeNames.ViewModelBase).Load();
+			CheckAssembly(assembly, viewModelBaseType);
 
 			var viewModelTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(viewModelBaseType).ToArray();
 			if (!viewModelTypes.Any()) {
@@ -34,7 +44,11 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 
 			log.Debug("View model types found:", viewModelTypes.Select(viewModel => viewModel.FullName).OrderBy(fullName => fullName));
 
-			var patchingViewModelTypes = viewModelTypes.Where(viewModelType => viewModelType.NotContainsAttribute<NotPatchingViewModelAttribute>()).ToArray();
+			var patchingViewModelTypes = viewModelTypes
+				.Where(viewModelType => viewModelType.NotContainsAttribute<NotPatchingViewModelAttribute>() &&
+					(selectingType == ViewModelSelectingType.All || viewModelType.ContainsAttribute<PatchingViewModelAttribute>()))
+				.ToArray();
+
 			if (!patchingViewModelTypes.Any()) {
 				log.Info("Not found patching view model types");
 				return PatchResult.Continue;
@@ -55,13 +69,36 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			return PatchResult.Continue;
 		}
 
+		private static void CheckAssembly(CommonAssembly assembly, CommonType viewModelBaseType) {
+			var typesWithPatchingViewModelAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsAttribute<PatchingViewModelAttribute>()).ToArray();
+			var typesWithNotPatchingViewModelAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsAttribute<NotPatchingViewModelAttribute>()).ToArray();
+
+			var errorsService = new ErrorsService()
+				.AddErrors(typesWithPatchingViewModelAttribute
+					.Where(type => type.IsNotInheritedFrom(viewModelBaseType))
+					.Select(type => $"Type '{type.FullName}' with attribute " +
+						$"'{nameof(PatchingViewModelAttribute)}' must be inherited from '{viewModelBaseType.FullName}'"))
+				.AddErrors(typesWithNotPatchingViewModelAttribute
+					.Where(type => type.IsNotInheritedFrom(viewModelBaseType))
+					.Select(type => $"Type '{type.FullName}' with attribute " +
+						$"'{nameof(NotPatchingViewModelAttribute)}' must be inherited from '{viewModelBaseType.FullName}'"))
+				.AddErrors(typesWithPatchingViewModelAttribute
+					.Intersect(typesWithNotPatchingViewModelAttribute)
+					.Select(type => $"Patching type '{type.FullName}' can not have " +
+						$"'{nameof(PatchingViewModelAttribute)}' and '{nameof(NotPatchingViewModelAttribute)}' at the same time"));
+
+			if (errorsService.HasErrors)
+				throw new ViewModelPatchingException(errorsService);
+		}
+
 		[AddLogOffset]
 		private PatchResult PatchViewModel(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType) {
 			log.Info($"Loading type '{viewModelType.FullName}'...");
 			viewModelType.Load();
 			log.Info($"Type '{viewModelType.FullName}' was loaded");
 
-			var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.ViewModelPatchingType ?? applicationPatcherWpfConfiguration.DefaultViewModelPatchingType;
+			var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.ViewModelPatchingType
+				?? applicationPatcherWpfConfiguration.DefaultViewModelPatchingType;
 			log.Info($"View model patching type: '{patchingType}'");
 
 			return PatchHelper.PatchApplication(viewModelPartPatchers, patcher => patcher.Patch(assembly, viewModelBaseType, viewModelType, patchingType), log);

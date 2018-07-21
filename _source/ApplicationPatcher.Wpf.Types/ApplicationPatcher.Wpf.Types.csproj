@@ -37,6 +37,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\AssemblyPatchedAttribute.cs" />
+    <Compile Include="Attributes\FrameworkElement\ConnectDependencyToPropertyAttribute.cs" />
+    <Compile Include="Attributes\FrameworkElement\ConnectPropertyToDependencyAttribute.cs" />
+    <Compile Include="Attributes\FrameworkElement\NotPatchingFrameworkElementAttribute.cs" />
+    <Compile Include="Attributes\FrameworkElement\PatchingFrameworkElementAttribute.cs" />
+    <Compile Include="Attributes\SelectingFrameworkElementAttribute.cs" />
+    <Compile Include="Attributes\SelectingViewModelAttribute.cs" />
     <Compile Include="Attributes\ViewModel\ConnectFieldToPropertyAttribute.cs" />
     <Compile Include="Attributes\ViewModel\ConnectMethodToMethodAttribute.cs" />
     <Compile Include="Attributes\ViewModel\ConnectMethodToPropertyAttribute.cs" />
@@ -45,11 +51,14 @@
     <Compile Include="Attributes\ViewModel\NotPatchingCommandAttribute.cs" />
     <Compile Include="Attributes\ViewModel\NotPatchingPropertyAttribute.cs" />
     <Compile Include="Attributes\ViewModel\NotPatchingViewModelAttribute.cs" />
-    <Compile Include="Attributes\ViewModel\NotUseSearchByNameAttribute.cs" />
+    <Compile Include="Attributes\NotUseSearchByNameAttribute.cs" />
     <Compile Include="Attributes\ViewModel\PatchingCommandAttribute.cs" />
     <Compile Include="Attributes\ViewModel\PatchingPropertyAttribute.cs" />
     <Compile Include="Attributes\ViewModel\PatchingViewModelAttribute.cs" />
+    <Compile Include="Enums\FrameworkElementPatchingType.cs" />
+    <Compile Include="Enums\FrameworkElementSelectingType.cs" />
     <Compile Include="Enums\ViewModelPatchingType.cs" />
+    <Compile Include="Enums\ViewModelSelectingType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

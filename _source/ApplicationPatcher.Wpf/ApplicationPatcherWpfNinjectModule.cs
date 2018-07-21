@@ -9,7 +9,7 @@ namespace ApplicationPatcher.Wpf {
 			Kernel.Bind(c => c.FromThisAssembly().SelectAllClasses().BindAllInterfaces().Configure(y => y.InSingletonScope()));
 			Kernel.Bind(c => c.FromThisAssembly().SelectAllClasses().BindAllBaseClasses().Configure(y => y.InSingletonScope()));
 
-			Kernel?.Rebind<CommonAssemblyFactory>().ToMethod(c => new CommonAssemblyFactory("GalaSoft.MvvmLight.Platform"));
+			Kernel?.Rebind<CommonAssemblyFactory>().ToMethod(c => new CommonAssemblyFactory("GalaSoft.MvvmLight.Platform", "PresentationFramework"));
 			Kernel?.Rebind<ApplicationPatcherWpfConfiguration>().ToMethod(c => ApplicationPatcherWpfConfiguration.ReadConfiguration());
 		}
 	}

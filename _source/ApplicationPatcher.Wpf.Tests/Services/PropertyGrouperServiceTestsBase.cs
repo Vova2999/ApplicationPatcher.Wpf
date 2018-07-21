@@ -83,9 +83,9 @@ namespace ApplicationPatcher.Wpf.Tests.Services {
 
 			try {
 				propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
-				Assert.Fail($"Expected a '{nameof(PropertyPatchingException)}' to be thrown, but no exception was thrown");
+				Assert.Fail($"Expected a '{nameof(ViewModelPropertyPatchingException)}' to be thrown, but no exception was thrown");
 			}
-			catch (PropertyPatchingException exception) {
+			catch (ViewModelPropertyPatchingException exception) {
 				Console.WriteLine(exception.Message);
 				Console.WriteLine();
 

@@ -10,4 +10,7 @@
 	<SkipConnectingByNameIfNameIsInvalid>false</SkipConnectingByNameIfNameIsInvalid>
 	<ConnectByNameIfExsistConnectAttribute>false</ConnectByNameIfExsistConnectAttribute>
 	<DefaultViewModelPatchingType>All</DefaultViewModelPatchingType>
+	<DefaultViewModelSelectingType>All</DefaultViewModelSelectingType>
+	<DefaultFrameworkElementPatchingType>All</DefaultFrameworkElementPatchingType>
+	<DefaultFrameworkElementSelectingType>All</DefaultFrameworkElementSelectingType>
 </ApplicationPatcherWpfConfiguration>

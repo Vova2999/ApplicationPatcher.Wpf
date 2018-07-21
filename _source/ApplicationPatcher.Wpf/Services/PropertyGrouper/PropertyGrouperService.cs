@@ -7,6 +7,7 @@ using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules;
+using ApplicationPatcher.Wpf.Types.Attributes;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 
@@ -86,7 +87,7 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 						$"connection in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{x.Field.Name}'"));
 
 			if (errorsService.HasErrors)
-				throw new PropertyPatchingException(errorsService);
+				throw new ViewModelPropertyPatchingException(errorsService);
 		}
 
 		private CommonProperty[] GetPatchingProperties(IHasProperties viewModelType, IHasType commandType, ViewModelPatchingType patchingType) {
@@ -111,7 +112,7 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 					.Select(property => $"Not valid patching property name '{property.Name}'"));
 
 			if (errorsService.HasErrors)
-				throw new PropertyPatchingException(errorsService);
+				throw new ViewModelPropertyPatchingException(errorsService);
 		}
 
 		private List<(CommonProperty Property, List<CommonField> Fields)> GetPatchingPropertyGroups(IEnumerable<CommonProperty> patchingProperties, CommonType viewModelType, IHasType commandType) {
@@ -164,7 +165,7 @@ namespace ApplicationPatcher.Wpf.Services.PropertyGrouper {
 					.Select(group => $"Not found field for property '{group.Property.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"));
 
 			if (errorsService.HasErrors)
-				throw new PropertyPatchingException(errorsService);
+				throw new ViewModelPropertyPatchingException(errorsService);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ApplicationPatcher.Wpf.Types.Attributes.ViewModel {
+namespace ApplicationPatcher.Wpf.Types.Attributes {
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
 	public class NotUseSearchByNameAttribute : Attribute {
 	}
