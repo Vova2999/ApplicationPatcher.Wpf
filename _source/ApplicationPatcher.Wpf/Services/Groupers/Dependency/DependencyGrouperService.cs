@@ -35,57 +35,61 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 		}
 
 		private static void CheckFrameworkElement(CommonType frameworkElementType, CommonType dependencyPropertyType) {
-			var propertiesWithPatchingDependencyPropertyAttribute = frameworkElementType.Properties.Where(property => property.ContainsAttribute<PatchingDependencyPropertyAttribute>()).ToArray();
+			var errorsService = new ErrorsService();
+			foreach (var property in frameworkElementType.Properties) {
+				if (property.ContainsAttribute<PatchingDependencyPropertyAttribute>() && property.ContainsAttribute<NotPatchingDependencyPropertyAttribute>())
+					errorsService.AddError($"Patching property '{property.Name}' can not have " +
+						$"'{nameof(PatchingDependencyPropertyAttribute)}' and '{nameof(NotPatchingDependencyPropertyAttribute)}' at the same time");
 
-			var errorsService = new ErrorsService()
-				.AddErrors(propertiesWithPatchingDependencyPropertyAttribute
-					.Where(property => property.ContainsAttribute<NotPatchingDependencyPropertyAttribute>())
-					.Select(property => $"Patching property '{property.Name}' can not have " +
-						$"'{nameof(PatchingDependencyPropertyAttribute)}' and '{nameof(NotPatchingDependencyPropertyAttribute)}' at the same time"));
+				var connectPropertyToDependencyAttributes = property.GetReflectionAttributes<ConnectPropertyToDependencyAttribute>().ToArray();
+				if (!connectPropertyToDependencyAttributes.Any())
+					continue;
 
-			var connectPropertyToDependencyAttributes = frameworkElementType.Properties
-				.SelectMany(property => property.GetReflectionAttributes<ConnectPropertyToDependencyAttribute>()
-					.Select(attribute => new { Property = property, Attribute = attribute, Field = frameworkElementType.GetField(attribute.ConnectingDependencyName) }))
-				.ToArray();
+				if (property.ContainsAttribute<NotPatchingDependencyPropertyAttribute>())
+					errorsService.AddError($"Patching property '{property.Name}' can not have '{nameof(NotPatchingDependencyPropertyAttribute)}', " +
+						$"connection in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{property.Name}'");
 
-			errorsService
-				.AddErrors(connectPropertyToDependencyAttributes
-					.Where(x => x.Property.ContainsAttribute<NotPatchingDependencyPropertyAttribute>())
-					.Select(x => $"Patching property '{x.Property.Name}' can not have '{nameof(NotPatchingDependencyPropertyAttribute)}', " +
-						$"connection in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{x.Property.Name}'"))
-				.AddErrors(connectPropertyToDependencyAttributes
-					.Where(x => x.Field == null)
-					.Select(x => $"Not found dependency field with name '{x.Attribute.ConnectingDependencyName}', " +
-						$"specified in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{x.Property.Name}'"))
-				.AddErrors(connectPropertyToDependencyAttributes
-					.Where(x => x.Field != null && !x.Field.MonoCecil.IsStatic)
-					.Select(x => $"Patching dependency field '{x.Field.Name}' can not be non static, " +
-						$"connection in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{x.Property.Name}'"))
-				.AddErrors(connectPropertyToDependencyAttributes
-					.Where(x => x.Field != null && x.Field.IsNot(dependencyPropertyType))
-					.Select(x => $"Patching dependency field '{x.Field.Name}' can not have " +
-						$"'{x.Field.Type.FullName}' type, allowable types: '{dependencyPropertyType.FullName}', " +
-						$"connection in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{x.Property.Name}'"));
+				foreach (var attribute in connectPropertyToDependencyAttributes) {
+					var field = frameworkElementType.GetField(attribute.ConnectingDependencyName);
 
-			var connectDependencyToPropertyAttributes = frameworkElementType.Fields
-				.SelectMany(field => field.GetReflectionAttributes<ConnectDependencyToPropertyAttribute>()
-					.Select(attribute => new { Field = field, Attribute = attribute, Property = frameworkElementType.GetProperty(attribute.ConnectingPropertyName) }))
-				.ToArray();
+					if (field == null) {
+						errorsService.AddError($"Not found dependency field with name '{attribute.ConnectingDependencyName}', " +
+							$"specified in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{property.Name}'");
+					}
+					else {
+						if (!field.MonoCecil.IsStatic)
+							errorsService.AddError($"Patching dependency field '{field.Name}' can not be non static, " +
+								$"connection in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{property.Name}'");
 
-			errorsService
-				.AddErrors(connectDependencyToPropertyAttributes
-					.Where(x => x.Property == null)
-					.Select(x => $"Not found property with name '{x.Attribute.ConnectingPropertyName}', " +
-						$"specified in '{nameof(ConnectDependencyToPropertyAttribute)}' at dependency field '{x.Field.Name}'"))
-				.AddErrors(connectDependencyToPropertyAttributes
-					.Where(x => x.Property != null && x.Property.ContainsAttribute<NotPatchingDependencyPropertyAttribute>())
-					.Select(x => $"Patching property '{x.Property.Name}' can not have '{nameof(NotPatchingDependencyPropertyAttribute)}', " +
-						$"connection in '{nameof(ConnectDependencyToPropertyAttribute)}' at dependency field '{x.Field.Name}'"))
-				.AddErrors(connectDependencyToPropertyAttributes
-					.Where(x => x.Field != null && x.Field.IsNot(dependencyPropertyType))
-					.Select(x => $"Patching dependency field '{x.Field.Name}' can not have " +
-						$"'{x.Field.Type.FullName}' type, allowable types: '{dependencyPropertyType.FullName}', " +
-						$"connection in '{nameof(ConnectDependencyToPropertyAttribute)}' at dependency field '{x.Field.Name}'"));
+						if (field.IsNot(dependencyPropertyType))
+							errorsService.AddError($"Patching dependency field '{field.Name}' can not have " +
+								$"'{field.Type.FullName}' type, allowable types: '{dependencyPropertyType.FullName}', " +
+								$"connection in '{nameof(ConnectPropertyToDependencyAttribute)}' at property '{property.Name}'");
+					}
+				}
+			}
+
+			foreach (var field in frameworkElementType.Fields) {
+				var connectDependencyToPropertyAttributes = field.GetReflectionAttributes<ConnectDependencyToPropertyAttribute>().ToArray();
+				if (!connectDependencyToPropertyAttributes.Any())
+					continue;
+
+				if (field.IsNot(dependencyPropertyType))
+					errorsService.AddError($"Patching dependency field '{field.Name}' can not have " +
+						$"'{field.Type.FullName}' type, allowable types: '{dependencyPropertyType.FullName}', " +
+						$"connection in '{nameof(ConnectDependencyToPropertyAttribute)}' at dependency field '{field.Name}'");
+
+				foreach (var attribute in connectDependencyToPropertyAttributes) {
+					var property = frameworkElementType.GetProperty(attribute.ConnectingPropertyName);
+
+					if (property == null)
+						errorsService.AddError($"Not found property with name '{attribute.ConnectingPropertyName}', " +
+							$"specified in '{nameof(ConnectDependencyToPropertyAttribute)}' at dependency field '{field.Name}'");
+					else if (property.ContainsAttribute<NotPatchingDependencyPropertyAttribute>())
+						errorsService.AddError($"Patching property '{property.Name}' can not have '{nameof(NotPatchingDependencyPropertyAttribute)}', " +
+							$"connection in '{nameof(ConnectDependencyToPropertyAttribute)}' at dependency field '{field.Name}'");
+				}
+			}
 
 			if (errorsService.HasErrors)
 				throw new FrameworkElementDependencyPatchingException(errorsService);
@@ -104,8 +108,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 		private void CheckPatchingPropertyNames(IEnumerable<CommonProperty> patchingProperties) {
 			var propertiesWithUseSearchByName = patchingProperties
 				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToDependencyAttribute>()))
-				.ToArray();
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToDependencyAttribute>()));
 
 			var errorsService = new ErrorsService()
 				.AddErrors(propertiesWithUseSearchByName
@@ -131,8 +134,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 		private void AddGroupsByPropertyName(ICollection<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, IHasFields frameworkElementType) {
 			var propertiesWithUseSearchByName = patchingDependencyGroups.Select(group => group.Property)
 				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToDependencyAttribute>()))
-				.ToArray();
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToDependencyAttribute>()));
 
 			foreach (var property in propertiesWithUseSearchByName) {
 				if (frameworkElementType.TryGetField(nameRulesService.ConvertName(property.Name, UseNameRulesFor.DependencyProperty, UseNameRulesFor.DependencyField), out var field))
@@ -152,22 +154,32 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 			}
 		}
 
-		private static void CheckPatchingPropertyGroups(IReadOnlyCollection<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, CommonType dependencyPropertyType) {
-			var errorsService = new ErrorsService()
-				.AddErrors(patchingDependencyGroups
-					.Where(group => group.Fields.Count > 1)
-					.Select(group => "Multi-connect property to dependency field found: " +
-						$"property '{group.Property.Name}', dependency fields: {group.Fields.Select(field => $"'{field.Name}'").JoinToString(", ")}"))
-				.AddErrors(patchingDependencyGroups
-					.Where(group => group.Fields.Count == 1 && !group.Fields.Single().MonoCecil.IsStatic)
-					.Select(group => $"Patching dependency field '{group.Fields.Single().Name}' can not be non static"))
-				.AddErrors(patchingDependencyGroups
-					.Where(group => group.Fields.Count == 1 && group.Fields.Single().IsNot(dependencyPropertyType))
-					.Select(group => $"Patching dependency field '{group.Fields.Single().Name}' can not have " +
-						$"'{group.Fields.Single().Type.FullName}' type, allowable types: '{dependencyPropertyType.FullName}'"))
-				.AddErrors(patchingDependencyGroups
-					.Where(group => !group.Fields.Any() && group.Property.ContainsAttribute<NotUseSearchByNameAttribute>())
-					.Select(group => $"Not found dependency field for property '{group.Property.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"));
+		private static void CheckPatchingPropertyGroups(IEnumerable<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, CommonType dependencyPropertyType) {
+			var errorsService = new ErrorsService();
+			foreach (var group in patchingDependencyGroups) {
+				switch (group.Fields.Count) {
+					case 0:
+						if (group.Property.ContainsAttribute<NotUseSearchByNameAttribute>())
+							errorsService.AddError($"Not found dependency field for property '{group.Property.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'");
+						break;
+
+					case 1:
+						var singleField = group.Fields.Single();
+
+						if (!singleField.MonoCecil.IsStatic)
+							errorsService.AddError($"Patching dependency field '{singleField.Name}' can not be non static");
+
+						if (singleField.IsNot(dependencyPropertyType))
+							errorsService.AddError($"Patching dependency field '{singleField.Name}' can not have " +
+								$"'{singleField.Type.FullName}' type, allowable types: '{dependencyPropertyType.FullName}'");
+						break;
+
+					default:
+						errorsService.AddError("Multi-connect property to dependency field found: " +
+							$"property '{group.Property.Name}', dependency fields: {group.Fields.Select(field => $"'{field.Name}'").JoinToString(", ")}");
+						break;
+				}
+			}
 
 			if (errorsService.HasErrors)
 				throw new FrameworkElementDependencyPatchingException(errorsService);

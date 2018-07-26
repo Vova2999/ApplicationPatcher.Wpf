@@ -36,180 +36,192 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 		}
 
 		private static void CheckViewModel(IHasType commandType, CommonType viewModelType) {
-			var methodsWithPatchingCommandAttribute = viewModelType.Methods.Where(method => method.ContainsAttribute<PatchingCommandAttribute>()).ToArray();
+			var errorsService = new ErrorsService();
+			foreach (var method in viewModelType.Methods) {
+				if (method.ContainsAttribute<PatchingCommandAttribute>()) {
+					if (method.ParameterTypes.Any())
+						errorsService.AddError($"Patching method '{method.Name}' can not have parameters");
 
-			var errorsService = new ErrorsService()
-				.AddErrors(methodsWithPatchingCommandAttribute
-					.Where(method => method.ParameterTypes.Any())
-					.Select(method => $"Patching method '{method.Name}' can not have parameters"))
-				.AddErrors(methodsWithPatchingCommandAttribute
-					.Where(method => method.ContainsAttribute<NotPatchingCommandAttribute>())
-					.Select(method => $"Patching method '{method.Name}' can not have " +
-						$"'{nameof(PatchingCommandAttribute)}' and '{nameof(NotPatchingCommandAttribute)}' at the same time"))
-				.AddErrors(methodsWithPatchingCommandAttribute
-					.Where(method => method.ReturnType != typeof(void))
-					.Select(method => $"Patching method '{method.Name}' can not have " +
-						$"'{method.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'"));
+					if (method.ContainsAttribute<NotPatchingCommandAttribute>())
+						errorsService.AddError($"Patching method '{method.Name}' can not have " +
+							$"'{nameof(PatchingCommandAttribute)}' and '{nameof(NotPatchingCommandAttribute)}' at the same time");
 
-			var connectMethodToMethodAttributes = viewModelType.Methods
-				.SelectMany(method => method.GetReflectionAttributes<ConnectMethodToMethodAttribute>()
-					.Select(attribute => new { Method = method, Attribute = attribute, Methods = viewModelType.GetMethods(attribute.ConnectingMethodName) }))
-				.ToArray();
+					if (method.ReturnType != typeof(void))
+						errorsService.AddError($"Patching method '{method.Name}' can not have " +
+							$"'{method.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'");
+				}
 
-			errorsService
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Method.ParameterTypes.Any())
-					.Select(x => $"Patching method '{x.Method.Name}' can not have parameters"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Method.ContainsAttribute<NotPatchingCommandAttribute>())
-					.Select(x => $"Patching method '{x.Method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Method.ReturnType != typeof(void) && x.Method.ReturnType != typeof(bool))
-					.Select(x => $"Patching method '{x.Method.Name}' can not have " +
-						$"'{x.Method.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}', '{typeof(bool).FullName}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => !x.Methods.Any())
-					.Select(x => $"Not found method with name '{x.Attribute.ConnectingMethodName}', " +
-						$"specified in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Methods.Length > 1)
-					.Select(x => $"Found several methods with name '{x.Attribute.ConnectingMethodName}', " +
-						$"specified in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Methods.Length == 1 && x.Methods.Single().ParameterTypes.Any())
-					.Select(x => $"Patching method '{x.Methods.Single().Name}' can not have parameters, " +
-						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Methods.Length == 1 && x.Methods.Single().ContainsAttribute<NotPatchingCommandAttribute>())
-					.Select(x => $"Patching method '{x.Methods.Single().Name}' can not have '{nameof(NotPatchingCommandAttribute)}', " +
-						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Methods.Length == 1 && x.Methods.Single().ReturnType != typeof(void) && x.Methods.Single().ReturnType != typeof(bool))
-					.Select(x => $"Patching method '{x.Methods.Single().Name}' can not have " +
-						$"'{x.Methods.Single().ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}', '{typeof(bool).FullName}', " +
-						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Method.ReturnType == typeof(void) || x.Method.ReturnType == typeof(bool))
-					.Where(x => x.Methods.Length == 1 && (x.Methods.Single().ReturnType == typeof(void) || x.Methods.Single().ReturnType == typeof(bool)))
-					.Where(x => x.Method.ReturnType == typeof(void) && x.Methods.Single().ReturnType == typeof(void))
-					.Select(x => $"Can not be connect two execute methods: '{x.Method.Name}' and '{x.Methods.Single().Name}', " +
-						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToMethodAttributes
-					.Where(x => x.Method.ReturnType == typeof(void) || x.Method.ReturnType == typeof(bool))
-					.Where(x => x.Methods.Length == 1 && (x.Methods.Single().ReturnType == typeof(void) || x.Methods.Single().ReturnType == typeof(bool)))
-					.Where(x => x.Method.ReturnType == typeof(bool) && x.Methods.Single().ReturnType == typeof(bool))
-					.Select(x => $"Can not be connect two can execute methods: '{x.Method.Name}' and '{x.Methods.Single().Name}', " +
-						$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{x.Method.Name}'"));
+				foreach (var attribute in method.GetReflectionAttributes<ConnectMethodToMethodAttribute>()) {
+					if (method.ParameterTypes.Any())
+						errorsService.AddError($"Patching method '{method.Name}' can not have parameters");
 
-			var connectMethodToPropertyAttributes = viewModelType.Methods
-				.SelectMany(method => method.GetReflectionAttributes<ConnectMethodToPropertyAttribute>()
-					.Select(attribute => new { Method = method, Attribute = attribute, Property = viewModelType.GetProperty(attribute.ConnectingPropertyName) }))
-				.ToArray();
+					if (method.ContainsAttribute<NotPatchingCommandAttribute>())
+						errorsService.AddError($"Patching method '{method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'");
 
-			errorsService
-				.AddErrors(connectMethodToPropertyAttributes
-					.Where(x => x.Method.ParameterTypes.Any())
-					.Select(x => $"Patching method '{x.Method.Name}' can not have parameters"))
-				.AddErrors(connectMethodToPropertyAttributes
-					.Where(x => x.Method.ContainsAttribute<NotPatchingCommandAttribute>())
-					.Select(x => $"Patching method '{x.Method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'"))
-				.AddErrors(connectMethodToPropertyAttributes
-					.Where(x => x.Method.ReturnType != typeof(void))
-					.Select(x => $"Patching method '{x.Method.Name}' can not have " +
-						$"'{x.Method.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'"))
-				.AddErrors(connectMethodToPropertyAttributes
-					.Where(x => x.Property == null)
-					.Select(x => $"Not found property with name '{x.Attribute.ConnectingPropertyName}', " +
-						$"specified in '{nameof(ConnectMethodToPropertyAttribute)}' at method '{x.Method.Name}'"))
-				.AddErrors(connectMethodToPropertyAttributes
-					.Where(x => x.Property != null && x.Property.IsNotInheritedFrom(commandType))
-					.Select(x => $"Property '{x.Property.Name}' can not have '{x.Property.Type.FullName}' type, " +
-						$"allowable types: all inherited from '{KnownTypeNames.ICommand}', " +
-						$"connection in '{nameof(ConnectMethodToPropertyAttribute)}' at method '{x.Method.Name}'"));
+					if (method.ReturnType != typeof(void) && method.ReturnType != typeof(bool))
+						errorsService.AddError($"Patching method '{method.Name}' can not have " +
+							$"'{method.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}', '{typeof(bool).FullName}'");
 
-			var connectPropertyToMethodAttributes = viewModelType.Properties
-				.SelectMany(property => property.GetReflectionAttributes<ConnectPropertyToMethodAttribute>()
-					.Select(attribute => new { Property = property, Attribute = attribute, NamesToMethods = attribute.ConnectingMethodNames.Select(name => new { Name = name, Methods = viewModelType.GetMethods(name) }).ToArray() }))
-				.ToArray();
+					var methods = viewModelType.GetMethods(attribute.ConnectingMethodName).ToArray();
+					switch (methods.Length) {
+						case 0:
+							errorsService.AddError($"Not found method with name '{attribute.ConnectingMethodName}', " +
+								$"specified in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
+							break;
 
-			errorsService
-				.AddErrors(connectPropertyToMethodAttributes
-					.Where(x => x.Property.IsNotInheritedFrom(commandType))
-					.Select(x => $"Patching property '{x.Property.Name}' can not have '{x.Property.Type.FullName}' type, " +
-						$"allowable types: all inherited from '{KnownTypeNames.ICommand}'"))
-				.AddErrors(connectPropertyToMethodAttributes
-					.SelectMany(x => x.NamesToMethods
-						.Where(y => !y.Methods.Any())
-						.Select(y => $"Not found method with name '{y.Name}', " +
-							$"specified in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'")))
-				.AddErrors(connectPropertyToMethodAttributes
-					.SelectMany(x => x.NamesToMethods
-						.Where(y => y.Methods.Length > 1)
-						.Select(y => $"Found several methods with name '{y.Name}', " +
-							$"specified in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'")))
-				.AddErrors(connectPropertyToMethodAttributes
-					.SelectMany(x => x.NamesToMethods
-						.Where(y => y.Methods.Length == 1 && y.Methods.Single().ParameterTypes.Any())
-						.Select(y => $"Patching method '{y.Methods.Single().Name}' can not have parameters, " +
-							$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'")))
-				.AddErrors(connectPropertyToMethodAttributes
-					.SelectMany(x => x.NamesToMethods
-						.Where(y => y.Methods.Length == 1 && y.Methods.Single().ContainsAttribute<NotPatchingCommandAttribute>())
-						.Select(y => $"Patching method '{y.Methods.Single().Name}' can not have '{nameof(NotPatchingCommandAttribute)}', " +
-							$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'")))
-				.AddErrors(connectPropertyToMethodAttributes
-					.SelectMany(x => x.NamesToMethods
-						.Where(y => y.Methods.Length == 1 && y.Methods.Single().ReturnType != typeof(void) && y.Methods.Single().ReturnType != typeof(bool))
-						.Select(y => $"Patching method '{y.Methods.Single().Name}' can not have " +
-							$"'{y.Methods.Single().ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}', '{typeof(bool).FullName}', " +
-							$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'")))
-				.AddErrors(connectPropertyToMethodAttributes
-					.Where(x => x.NamesToMethods.Length == 1 && x.NamesToMethods.Single().Methods.Length == 1)
-					.Where(x => x.NamesToMethods.Single().Methods.Single().ReturnType == typeof(bool))
-					.Select(x => $"Can not be connect to can execute method '{x.NamesToMethods.Single().Methods.Single().Name}', " +
-						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"))
-				.AddErrors(connectPropertyToMethodAttributes
-					.Where(x => x.NamesToMethods.Length == 2 && x.NamesToMethods[0].Methods.Length == 1 && x.NamesToMethods[1].Methods.Length == 1)
-					.Where(x => x.NamesToMethods[0].Methods.Single().ReturnType == typeof(void) && x.NamesToMethods[1].Methods.Single().ReturnType == typeof(void))
-					.Select(x => $"Can not be connect to two execute methods: '{x.NamesToMethods[0].Methods.Single().Name}' and '{x.NamesToMethods[1].Methods.Single().Name}', " +
-						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"))
-				.AddErrors(connectPropertyToMethodAttributes
-					.Where(x => x.NamesToMethods.Length == 2 && x.NamesToMethods[0].Methods.Length == 1 && x.NamesToMethods[1].Methods.Length == 1)
-					.Where(x => x.NamesToMethods[0].Methods.Single().ReturnType == typeof(bool) && x.NamesToMethods[1].Methods.Single().ReturnType == typeof(bool))
-					.Select(x => $"Can not be connect to two can execute methods: '{x.NamesToMethods[0].Methods.Single().Name}' and '{x.NamesToMethods[1].Methods.Single().Name}', " +
-						$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{x.Property.Name}'"));
+						case 1:
+							var singleMethod = methods.Single();
 
-			var connectPropertyToFieldAttributes = viewModelType.Properties
-				.Where(property => property.IsInheritedFrom(commandType))
-				.SelectMany(property => property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>()
-					.Select(attribute => new { Property = property, Attribute = attribute, Field = viewModelType.GetField(attribute.ConnectingFieldName) }))
-				.ToArray();
+							if (singleMethod.ParameterTypes.Any())
+								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have parameters, " +
+									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
 
-			errorsService
-				.AddErrors(connectPropertyToFieldAttributes
-					.Where(x => x.Field == null)
-					.Select(x => $"Not found field with name '{x.Attribute.ConnectingFieldName}', " +
-						$"specified in '{nameof(ConnectPropertyToFieldAttribute)}' at property '{x.Property.Name}'"))
-				.AddErrors(connectPropertyToFieldAttributes
-					.Where(x => x.Field != null && x.Property.IsNot(x.Field))
-					.Select(x => $"Types do not match between property '{x.Property.Name}' and field '{x.Field.Name}', " +
-						$"connection in '{nameof(ConnectPropertyToFieldAttribute)}' at property '{x.Property.Name}'"));
+							if (singleMethod.ContainsAttribute<NotPatchingCommandAttribute>())
+								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have '{nameof(NotPatchingCommandAttribute)}', " +
+									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
 
-			var connectFieldToPropertyAttributes = viewModelType.Fields
-				.Where(field => field.IsInheritedFrom(commandType))
-				.SelectMany(field => field.GetReflectionAttributes<ConnectFieldToPropertyAttribute>()
-					.Select(attribute => new { Field = field, Attribute = attribute, Property = viewModelType.GetProperty(attribute.ConnectingPropertyName) }))
-				.ToArray();
+							if (singleMethod.ReturnType != typeof(void) && singleMethod.ReturnType != typeof(bool)) {
+								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have " +
+									$"'{singleMethod.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}', '{typeof(bool).FullName}', " +
+									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
+							}
+							else {
+								if (method.ReturnType == typeof(void) && singleMethod.ReturnType == typeof(void))
+									errorsService.AddError($"Can not be connect two execute methods: '{method.Name}' and '{singleMethod.Name}', " +
+										$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
 
-			errorsService
-				.AddErrors(connectFieldToPropertyAttributes
-					.Where(x => x.Property == null)
-					.Select(x => $"Not found property with name '{x.Attribute.ConnectingPropertyName}', " +
-						$"specified in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{x.Field.Name}'"))
-				.AddErrors(connectFieldToPropertyAttributes
-					.Where(x => x.Property != null && x.Field.IsNot(x.Property))
-					.Select(x => $"Types do not match between field '{x.Field.Name}' and property '{x.Property.Name}', " +
-						$"connection in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{x.Field.Name}'"));
+								if (method.ReturnType == typeof(bool) && singleMethod.ReturnType == typeof(bool))
+									errorsService.AddError($"Can not be connect two can execute methods: '{method.Name}' and '{singleMethod.Name}', " +
+										$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
+							}
+
+							break;
+
+						default:
+							errorsService.AddError($"Found several methods with name '{attribute.ConnectingMethodName}', " +
+								$"specified in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
+							break;
+					}
+				}
+
+				foreach (var attribute in method.GetReflectionAttributes<ConnectMethodToPropertyAttribute>()) {
+					if (method.ParameterTypes.Any())
+						errorsService.AddError($"Patching method '{method.Name}' can not have parameters");
+
+					if (method.ContainsAttribute<NotPatchingCommandAttribute>())
+						errorsService.AddError($"Patching method '{method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'");
+
+					if (method.ReturnType != typeof(void))
+						errorsService.AddError($"Patching method '{method.Name}' can not have " +
+							$"'{method.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'");
+
+					var property = viewModelType.GetProperty(attribute.ConnectingPropertyName);
+
+					if (property == null)
+						errorsService.AddError($"Not found property with name '{attribute.ConnectingPropertyName}', " +
+							$"specified in '{nameof(ConnectMethodToPropertyAttribute)}' at method '{method.Name}'");
+					else if (property.IsNotInheritedFrom(commandType))
+						errorsService.AddError($"Property '{property.Name}' can not have '{property.Type.FullName}' type, " +
+							$"allowable types: all inherited from '{KnownTypeNames.ICommand}', " +
+							$"connection in '{nameof(ConnectMethodToPropertyAttribute)}' at method '{method.Name}'");
+				}
+			}
+
+			foreach (var property in viewModelType.Properties) {
+				if (property.IsInheritedFrom(commandType))
+					foreach (var attribute in property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>()) {
+						var field = viewModelType.GetField(attribute.ConnectingFieldName);
+
+						if (field == null)
+							errorsService.AddError($"Not found field with name '{attribute.ConnectingFieldName}', " +
+								$"specified in '{nameof(ConnectPropertyToFieldAttribute)}' at property '{property.Name}'");
+						else if (property.IsNot(field))
+							errorsService.AddError($"Types do not match between property '{property.Name}' and field '{field.Name}', " +
+								$"connection in '{nameof(ConnectPropertyToFieldAttribute)}' at property '{property.Name}'");
+					}
+
+				var connectPropertyToMethodAttributes = property.GetReflectionAttributes<ConnectPropertyToMethodAttribute>().ToArray();
+				if (!connectPropertyToMethodAttributes.Any())
+					continue;
+
+				if (property.IsNotInheritedFrom(commandType))
+					errorsService.AddError($"Patching property '{property.Name}' can not have '{property.Type.FullName}' type, " +
+						$"allowable types: all inherited from '{KnownTypeNames.ICommand}'");
+
+				foreach (var namesToMethods in connectPropertyToMethodAttributes.Select(attribute => attribute.ConnectingMethodNames.Select(name => new { Name = name, Methods = viewModelType.GetMethods(name).ToArray() }).ToArray())) {
+					foreach (var nameToMethods in namesToMethods) {
+						switch (nameToMethods.Methods.Length) {
+							case 0:
+								errorsService.AddError($"Not found method with name '{nameToMethods.Name}', " +
+									$"specified in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+								break;
+
+							case 1:
+								var singleMethod = nameToMethods.Methods.Single();
+
+								if (singleMethod.ParameterTypes.Any())
+									errorsService.AddError($"Patching method '{singleMethod.Name}' can not have parameters, " +
+										$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+
+								if (singleMethod.ContainsAttribute<NotPatchingCommandAttribute>())
+									errorsService.AddError($"Patching method '{singleMethod.Name}' can not have '{nameof(NotPatchingCommandAttribute)}', " +
+										$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+
+								if (singleMethod.ReturnType != typeof(void) && singleMethod.ReturnType != typeof(bool))
+									errorsService.AddError($"Patching method '{singleMethod.Name}' can not have " +
+										$"'{singleMethod.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}', '{typeof(bool).FullName}', " +
+										$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+								break;
+
+							default:
+								errorsService.AddError($"Found several methods with name '{nameToMethods.Name}', " +
+									$"specified in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+								break;
+						}
+					}
+
+					// ReSharper disable once SwitchStatementMissingSomeCases
+					switch (namesToMethods.Length) {
+						case 1:
+							var singleNameToMethods = namesToMethods.Single();
+							var singleMethod = singleNameToMethods.Methods.Single();
+
+							if (singleNameToMethods.Methods.Length == 1 && singleMethod.ReturnType == typeof(bool))
+								errorsService.AddError($"Can not be connect to can execute method '{singleMethod.Name}', " +
+									$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+							break;
+
+						case 2:
+							if (namesToMethods[0].Methods.Length == 1 && namesToMethods[1].Methods.Length == 1) {
+								var singleFirstMethod = namesToMethods[0].Methods.Single();
+								var singleSecondMethod = namesToMethods[1].Methods.Single();
+
+								if (singleFirstMethod.ReturnType == typeof(void) && singleSecondMethod.ReturnType == typeof(void))
+									errorsService.AddError($"Can not be connect to two execute methods: '{singleFirstMethod.Name}' and '{singleSecondMethod.Name}', " +
+										$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+
+								if (singleFirstMethod.ReturnType == typeof(bool) && singleSecondMethod.ReturnType == typeof(bool))
+									errorsService.AddError($"Can not be connect to two can execute methods: '{singleFirstMethod.Name}' and '{singleSecondMethod.Name}', " +
+										$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
+							}
+
+							break;
+					}
+				}
+			}
+
+			foreach (var field in viewModelType.Fields.Where(field => field.IsInheritedFrom(commandType))) {
+				foreach (var attribute in field.GetReflectionAttributes<ConnectFieldToPropertyAttribute>()) {
+					var property = viewModelType.GetProperty(attribute.ConnectingPropertyName);
+
+					if (property == null)
+						errorsService.AddError($"Not found property with name '{attribute.ConnectingPropertyName}', " +
+							$"specified in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{field.Name}'");
+					else if (field.IsNot(property))
+						errorsService.AddError($"Types do not match between field '{field.Name}' and property '{property.Name}', " +
+							$"connection in '{nameof(ConnectFieldToPropertyAttribute)}' at field '{field.Name}'");
+				}
+			}
 
 			if (errorsService.HasErrors)
 				throw new ViewModelCommandPatchingException(errorsService);
@@ -229,8 +241,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 		private void CheckPatchingMethodNames(IEnumerable<CommonMethod> patchingMethods) {
 			var methodsWithUseSearchByName = patchingMethods
 				.Where(method => method.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || method.NotContainsAttribute<ConnectMethodToMethodAttribute>() && method.NotContainsAttribute<ConnectMethodToPropertyAttribute>()))
-				.ToArray();
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || method.NotContainsAttribute<ConnectMethodToMethodAttribute>() && method.NotContainsAttribute<ConnectMethodToPropertyAttribute>()));
 
 			var errorsService = new ErrorsService()
 				.AddErrors(methodsWithUseSearchByName
@@ -266,8 +277,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 		private void AddGroupsByCommandName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, CommonType viewModelType) {
 			var methodsWithUseSearchByName = patchingCommandGroups.Select(group => group.ExecuteMethod)
 				.Where(method => method.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || method.NotContainsAttribute<ConnectMethodToMethodAttribute>() && method.NotContainsAttribute<ConnectMethodToPropertyAttribute>()))
-				.ToArray();
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || method.NotContainsAttribute<ConnectMethodToMethodAttribute>() && method.NotContainsAttribute<ConnectMethodToPropertyAttribute>()));
 
 			foreach (var method in methodsWithUseSearchByName) {
 				var propertyName = nameRulesService.ConvertName(method.Name, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandProperty);
@@ -326,8 +336,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 
 			var propertiesWithUseSearchByName = patchingProperties
 				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()))
-				.ToArray();
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
 
 			var errorsService = new ErrorsService()
 				.AddErrors(propertiesWithUseSearchByName
@@ -341,11 +350,10 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 		private void FillGroupsByPropertyName(ICollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups, IHasFields viewModelType, IHasType commandType) {
 			var propertiesWithUseSearchByName = patchingCommandGroups.SelectMany(group => group.Properties)
 				.Where(property => property.IsInheritedFrom(commandType) && property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()))
-				.ToArray();
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
 
 			if (applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid)
-				propertiesWithUseSearchByName = propertiesWithUseSearchByName.Where(property => nameRulesService.IsNameValid(property.Name, UseNameRulesFor.CommandProperty)).ToArray();
+				propertiesWithUseSearchByName = propertiesWithUseSearchByName.Where(property => nameRulesService.IsNameValid(property.Name, UseNameRulesFor.CommandProperty));
 
 			foreach (var property in propertiesWithUseSearchByName) {
 				if (!viewModelType.TryGetField(nameRulesService.ConvertName(property.Name, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandField), out var foundField))
@@ -384,43 +392,73 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 			}
 		}
 
-		private void CheckPatchingCommandGroups(IReadOnlyCollection<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups) {
-			var errorsService = new ErrorsService()
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.Properties.Count == 1 && group.Fields.Count > 1)
-					.Select(group => "Multi-connect property to field found: " +
-						$"property '{group.Properties.Single().Name}', fields: {group.Fields.Select(property => $"'{property.Name}'").JoinToString(", ")}"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.Properties.Count > 1)
-					.Select(group => "Multi-connect execute method to property found: " +
-						$"execute method '{group.ExecuteMethod.Name}', properties: {group.Properties.Select(property => $"'{property.Name}'").JoinToString(", ")}"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.CanExecuteMethods.Count > 1)
-					.Select(group => "Multi-connect execute method to can execute method found: " +
-						$"execute method '{group.ExecuteMethod.Name}', can execute methods: {group.CanExecuteMethods.Select(method => $"'{method.Name}'").JoinToString(", ")}"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.Properties.Count == 1 && group.Fields.Count == 1 && group.Properties.Single().IsNot(group.Fields.Single()))
-					.Select(group => $"Types do not match inside group: property '{group.Properties.Single().Name}', field '{group.Fields.Single().Name}'"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.ExecuteMethod.ParameterTypes.Any())
-					.Select(group => $"Execute method '{group.ExecuteMethod.Name}' can not have parameters"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.ExecuteMethod.ReturnType != typeof(void))
-					.Select(group => $"Execute method '{group.ExecuteMethod.Name}' can not have " +
-						$"'{group.ExecuteMethod.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.CanExecuteMethods.Count == 1 && group.CanExecuteMethods.Single().ParameterTypes.Any())
-					.Select(group => $"Can execute method '{group.CanExecuteMethods.Single().Name}' can not have parameters"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => group.CanExecuteMethods.Count == 1 && group.CanExecuteMethods.Single().ReturnType != typeof(bool))
-					.Select(group => $"Can execute method '{group.CanExecuteMethods.Single().Name}' can not have " +
-						$"'{group.CanExecuteMethods.Single().ReturnType.FullName}' return type, allowable types: '{typeof(bool).FullName}'"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => !group.Properties.Any() && group.ExecuteMethod.ContainsAttribute<NotUseSearchByNameAttribute>())
-					.Select(group => $"Not found property for execute method '{group.ExecuteMethod.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"))
-				.AddErrors(patchingCommandGroups
-					.Where(group => !group.Fields.Any() && group.Properties.Count == 1 && group.Properties.Single().ContainsAttribute<NotUseSearchByNameAttribute>())
-					.Select(group => $"Not found field for property '{group.Properties.Single().Name}' when using '{nameof(NotUseSearchByNameAttribute)}'"));
+		private void CheckPatchingCommandGroups(IEnumerable<(CommonMethod ExecuteMethod, List<CommonMethod> CanExecuteMethods, List<CommonProperty> Properties, List<CommonField> Fields)> patchingCommandGroups) {
+			var errorsService = new ErrorsService();
+			foreach (var group in patchingCommandGroups) {
+				if (group.ExecuteMethod.ParameterTypes.Any())
+					errorsService.AddError($"Execute method '{group.ExecuteMethod.Name}' can not have parameters");
+
+				if (group.ExecuteMethod.ReturnType != typeof(void))
+					errorsService.AddError($"Execute method '{group.ExecuteMethod.Name}' can not have " +
+						$"'{group.ExecuteMethod.ReturnType.FullName}' return type, allowable types: '{typeof(void).FullName}'");
+
+				switch (group.Properties.Count) {
+					case 0:
+						if (group.ExecuteMethod.ContainsAttribute<NotUseSearchByNameAttribute>())
+							errorsService.AddError($"Not found property for execute method '{group.ExecuteMethod.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'");
+						break;
+
+					case 1:
+						var singleProperty = group.Properties.Single();
+
+						switch (group.Fields.Count) {
+							case 0:
+								if (singleProperty.ContainsAttribute<NotUseSearchByNameAttribute>())
+									errorsService.AddError($"Not found field for property '{singleProperty.Name}' when using '{nameof(NotUseSearchByNameAttribute)}'");
+								break;
+
+							case 1:
+								var singleField = group.Fields.Single();
+
+								if (singleProperty.IsNot(singleField))
+									errorsService.AddError($"Types do not match inside group: property '{singleProperty.Name}', field '{singleField.Name}'");
+								break;
+
+							default:
+								errorsService.AddError("Multi-connect property to field found: " +
+									$"property '{singleProperty.Name}', fields: {group.Fields.Select(property => $"'{property.Name}'").JoinToString(", ")}");
+								break;
+						}
+
+						break;
+
+					default:
+						errorsService.AddError("Multi-connect execute method to property found: " +
+							$"execute method '{group.ExecuteMethod.Name}', properties: {group.Properties.Select(property => $"'{property.Name}'").JoinToString(", ")}");
+						break;
+				}
+
+				switch (group.CanExecuteMethods.Count) {
+					case 0:
+						break;
+
+					case 1:
+						var singleCanExecuteMethod = group.CanExecuteMethods.Single();
+
+						if (singleCanExecuteMethod.ParameterTypes.Any())
+							errorsService.AddError($"Can execute method '{singleCanExecuteMethod.Name}' can not have parameters");
+
+						if (singleCanExecuteMethod.ReturnType != typeof(bool))
+							errorsService.AddError($"Can execute method '{singleCanExecuteMethod.Name}' can not have " +
+								$"'{singleCanExecuteMethod.ReturnType.FullName}' return type, allowable types: '{typeof(bool).FullName}'");
+						break;
+
+					default:
+						errorsService.AddError("Multi-connect execute method to can execute method found: " +
+							$"execute method '{group.ExecuteMethod.Name}', can execute methods: {group.CanExecuteMethods.Select(method => $"'{method.Name}'").JoinToString(", ")}");
+						break;
+				}
+			}
 
 			if (errorsService.HasErrors)
 				throw new ViewModelCommandPatchingException(errorsService);

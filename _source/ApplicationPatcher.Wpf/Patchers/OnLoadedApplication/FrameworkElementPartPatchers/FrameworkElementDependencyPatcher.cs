@@ -94,7 +94,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 
 			return field;
 		}
-		private void InitializeInStaticConstructor(CommonAssembly assembly, CommonType frameworkElementType, CommonProperty property, FieldDefinition field) {
+		private void InitializeInStaticConstructor(CommonAssembly assembly, CommonType frameworkElementType, CommonProperty property, FieldReference field) {
 			var staticConstructor = frameworkElementType.MonoCecil.GetStaticConstructor();
 			if (staticConstructor == null) {
 				staticConstructor = new MethodDefinition(".cctor", MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.Static, assembly.MonoCecil.MainModule.TypeSystem.Void);
