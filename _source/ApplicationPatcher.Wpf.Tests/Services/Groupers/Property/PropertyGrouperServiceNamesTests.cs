@@ -1,6 +1,6 @@
 ﻿using ApplicationPatcher.Tests;
 using ApplicationPatcher.Tests.FakeTypes;
-using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
+using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 

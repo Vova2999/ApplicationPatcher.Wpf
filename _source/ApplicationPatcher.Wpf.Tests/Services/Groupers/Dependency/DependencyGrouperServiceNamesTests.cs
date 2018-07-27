@@ -1,6 +1,6 @@
 ﻿using ApplicationPatcher.Tests;
 using ApplicationPatcher.Tests.FakeTypes;
-using ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement;
+using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 
@@ -17,7 +17,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 				.Build();
 
 			var secondFrameworkElementType = FakeCommonTypeBuilder.Create("SecondFrameworkElement")
-				.AddProperty(patchingSecondPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new PatchingDependencyPropertyAttribute())
+				.AddProperty(patchingSecondPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new PatchingPropertyAttribute())
 				.Build();
 
 			CheckValidFrameworkElement(firstFrameworkElementType, FrameworkElementPatchingType.All, true, false);

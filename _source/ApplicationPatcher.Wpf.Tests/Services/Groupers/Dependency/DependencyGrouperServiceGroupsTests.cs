@@ -1,7 +1,6 @@
 ﻿using ApplicationPatcher.Tests;
 using ApplicationPatcher.Tests.FakeTypes;
-using ApplicationPatcher.Wpf.Types.Attributes;
-using ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement;
+using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using ApplicationPatcher.Wpf.Types.Enums;
 using NUnit.Framework;
 
@@ -16,20 +15,20 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			var firstFrameworkElementType = FakeCommonTypeBuilder.Create("FirstFrameworkElement")
 				.AddField(patchingFieldName, DependencyPropertyType.Type)
-				.AddField(patchingSecondFieldName, DependencyPropertyType.Type, new ConnectDependencyToPropertyAttribute(patchingPropertyName))
+				.AddField(patchingSecondFieldName, DependencyPropertyType.Type, new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
 				.Build();
 
 			var secondFrameworkElementType = FakeCommonTypeBuilder.Create("SecondFrameworkElement")
-				.AddField(patchingFieldName, DependencyPropertyType.Type, new ConnectDependencyToPropertyAttribute(patchingPropertyName))
-				.AddField(patchingSecondFieldName, DependencyPropertyType.Type, new ConnectDependencyToPropertyAttribute(patchingPropertyName))
+				.AddField(patchingFieldName, DependencyPropertyType.Type, new ConnectFieldToPropertyAttribute(patchingPropertyName))
+				.AddField(patchingSecondFieldName, DependencyPropertyType.Type, new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
 				.Build();
 
 			var thirdFrameworkElementType = FakeCommonTypeBuilder.Create("ThirdFrameworkElement")
-				.AddField(patchingFieldName, DependencyPropertyType.Type, new ConnectDependencyToPropertyAttribute(patchingPropertyName))
+				.AddField(patchingFieldName, DependencyPropertyType.Type, new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.AddField(patchingSecondFieldName, DependencyPropertyType.Type)
-				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new ConnectPropertyToDependencyAttribute(patchingSecondFieldName))
+				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new ConnectPropertyToFieldAttribute(patchingSecondFieldName))
 				.Build();
 
 			SetStaticField(firstFrameworkElementType, patchingFieldName);
@@ -41,7 +40,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			CheckInvalidFrameworkElement(firstFrameworkElementType,
 				FrameworkElementPatchingType.All,
-				$"Multi-connect property to dependency field found: property '{patchingPropertyName}', dependency fields: '{patchingFieldName}', '{patchingSecondFieldName}'",
+				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingFieldName}', '{patchingSecondFieldName}'",
 				false,
 				true);
 
@@ -49,19 +48,19 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			CheckInvalidFrameworkElement(secondFrameworkElementType,
 				FrameworkElementPatchingType.All,
-				$"Multi-connect property to dependency field found: property '{patchingPropertyName}', dependency fields: '{patchingFieldName}', '{patchingSecondFieldName}'");
+				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingFieldName}', '{patchingSecondFieldName}'");
 
 			CheckInvalidFrameworkElement(secondFrameworkElementType,
 				FrameworkElementPatchingType.Selectively,
-				$"Multi-connect property to dependency field found: property '{patchingPropertyName}', dependency fields: '{patchingFieldName}', '{patchingSecondFieldName}'");
+				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingFieldName}', '{patchingSecondFieldName}'");
 
 			CheckInvalidFrameworkElement(thirdFrameworkElementType,
 				FrameworkElementPatchingType.All,
-				$"Multi-connect property to dependency field found: property '{patchingPropertyName}', dependency fields: '{patchingSecondFieldName}', '{patchingFieldName}'");
+				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFieldName}'");
 
 			CheckInvalidFrameworkElement(thirdFrameworkElementType,
 				FrameworkElementPatchingType.Selectively,
-				$"Multi-connect property to dependency field found: property '{patchingPropertyName}', dependency fields: '{patchingSecondFieldName}', '{patchingFieldName}'");
+				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFieldName}'");
 		}
 
 		[Test]
@@ -92,7 +91,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			CheckInvalidFrameworkElement(frameworkElementType,
 				FrameworkElementPatchingType.All,
-				$"Patching dependency field '{patchingFieldName}' can not be non static");
+				$"Patching field '{patchingFieldName}' can not be non static");
 
 			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false);
 		}
@@ -127,7 +126,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			CheckInvalidFrameworkElement(frameworkElementType,
 				FrameworkElementPatchingType.All,
-				$"Patching dependency field '{patchingFieldName}' can not have '{typeof(int).FullName}' type, allowable types: '{DependencyPropertyType.FullName}'");
+				$"Patching field '{patchingFieldName}' can not have '{typeof(int).FullName}' type, allowable types: '{DependencyPropertyType.FullName}'");
 
 			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false);
 		}
@@ -158,7 +157,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			CheckInvalidFrameworkElement(frameworkElementType,
 				FrameworkElementPatchingType.All,
-				$"Not found dependency field for property '{patchingPropertyName}' when using '{nameof(NotUseSearchByNameAttribute)}'");
+				$"Not found field for property '{patchingPropertyName}' when using '{nameof(NotUseSearchByNameAttribute)}'");
 
 			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false);
 		}
@@ -169,7 +168,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 			const string patchingPropertyName = "AnyValue";
 
 			var frameworkElementType = FakeCommonTypeBuilder.Create("FrameworkElement")
-				.AddField(patchingFieldName, DependencyPropertyType.Type, new ConnectDependencyToPropertyAttribute(patchingPropertyName))
+				.AddField(patchingFieldName, DependencyPropertyType.Type, new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new NotUseSearchByNameAttribute())
 				.Build();
 

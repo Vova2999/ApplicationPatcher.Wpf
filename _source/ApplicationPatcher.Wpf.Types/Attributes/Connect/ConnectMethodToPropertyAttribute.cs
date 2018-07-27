@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ApplicationPatcher.Wpf.Types.Attributes.ViewModel {
+namespace ApplicationPatcher.Wpf.Types.Attributes.Connect {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 	public class ConnectMethodToPropertyAttribute : Attribute {
 		public readonly string ConnectingPropertyName;

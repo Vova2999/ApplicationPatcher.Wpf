@@ -1,4 +1,5 @@
-﻿using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
+﻿using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
+using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 using FluentAssertions;
 using GalaSoft.MvvmLight;

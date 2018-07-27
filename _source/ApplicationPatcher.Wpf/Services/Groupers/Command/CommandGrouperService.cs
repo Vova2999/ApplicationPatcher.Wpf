@@ -8,8 +8,8 @@ using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules;
-using ApplicationPatcher.Wpf.Types.Attributes;
-using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
+using ApplicationPatcher.Wpf.Types.Attributes.Connect;
+using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
 using ApplicationPatcher.Wpf.Types.Enums;
 
 namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
@@ -184,10 +184,9 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 					switch (namesToMethods.Length) {
 						case 1:
 							var singleNameToMethods = namesToMethods.Single();
-							var singleMethod = singleNameToMethods.Methods.Single();
 
-							if (singleNameToMethods.Methods.Length == 1 && singleMethod.ReturnType == typeof(bool))
-								errorsService.AddError($"Can not be connect to can execute method '{singleMethod.Name}', " +
+							if (singleNameToMethods.Methods.Length == 1 && singleNameToMethods.Methods.Single().ReturnType == typeof(bool))
+								errorsService.AddError($"Can not be connect to can execute method '{singleNameToMethods.Methods.Single().Name}', " +
 									$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
 							break;
 

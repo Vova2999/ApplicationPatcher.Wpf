@@ -97,7 +97,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			viewModelType.Load();
 			log.Info($"Type '{viewModelType.FullName}' was loaded");
 
-			var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.ViewModelPatchingType
+			var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.PatchingType
 				?? applicationPatcherWpfConfiguration.DefaultViewModelPatchingType;
 			log.Info($"View model patching type: '{patchingType}'");
 

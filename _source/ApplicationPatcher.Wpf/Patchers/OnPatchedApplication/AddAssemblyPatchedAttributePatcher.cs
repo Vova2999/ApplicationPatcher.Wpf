@@ -29,7 +29,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 
 			assembly.MonoCecil.CustomAttributes.Add(new CustomAttribute(assembly.MonoCecil.MainModule.ImportReference(assemblyPatchedAttributeConstructor.MonoCecil)));
 
-			log.Info("Assembly patched attribute added");
+			log.Info("Assembly patched attribute was added");
 			return PatchResult.Continue;
 		}
 	}

@@ -1,4 +1,4 @@
-﻿using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
+﻿using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using FluentAssertions;
 using GalaSoft.MvvmLight;
 using NUnit.Framework;

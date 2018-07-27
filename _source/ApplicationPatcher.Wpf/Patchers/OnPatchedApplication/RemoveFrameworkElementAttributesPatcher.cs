@@ -5,8 +5,9 @@ using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
 using ApplicationPatcher.Core.Types.CommonMembers;
 using ApplicationPatcher.Wpf.Extensions;
-using ApplicationPatcher.Wpf.Types.Attributes;
+using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement;
+using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
 using JetBrains.Annotations;
 
 namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
@@ -36,13 +37,13 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 				frameworkElementType.MonoCecil.RemoveAttributes<NotPatchingFrameworkElementAttribute>();
 
 				foreach (var property in frameworkElementType.Fields)
-					property.MonoCecil.RemoveAttributes<ConnectDependencyToPropertyAttribute>();
+					property.MonoCecil.RemoveAttributes<ConnectFieldToPropertyAttribute>();
 
 				foreach (var property in frameworkElementType.Properties) {
 					property.MonoCecil.RemoveAttributes<NotUseSearchByNameAttribute>();
-					property.MonoCecil.RemoveAttributes<PatchingDependencyPropertyAttribute>();
-					property.MonoCecil.RemoveAttributes<NotPatchingDependencyPropertyAttribute>();
-					property.MonoCecil.RemoveAttributes<ConnectPropertyToDependencyAttribute>();
+					property.MonoCecil.RemoveAttributes<PatchingPropertyAttribute>();
+					property.MonoCecil.RemoveAttributes<NotPatchingPropertyAttribute>();
+					property.MonoCecil.RemoveAttributes<ConnectPropertyToFieldAttribute>();
 				}
 			}
 		}
