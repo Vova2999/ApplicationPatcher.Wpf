@@ -31,19 +31,36 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Property {
 			var patchingPropertyGroups = GetPatchingPropertyGroups(patchingProperties, viewModelType, commandType);
 			CheckPatchingPropertyGroups(patchingPropertyGroups);
 
-			return patchingPropertyGroups.Select(group => new PropertyGroup(group.Fields.SingleOrDefault(), group.Property)).ToArray();
+			return patchingPropertyGroups
+				.Select(group => {
+					var patchingPropertyAttribute = group.Property.GetReflectionAttribute<PatchingPropertyAttribute>();
+					return new PropertyGroup(
+						group.Fields.SingleOrDefault(),
+						group.Property,
+						GetCalledMethod(viewModelType, patchingPropertyAttribute?.CalledMethodNameBeforeGetProperty),
+						GetCalledMethod(viewModelType, patchingPropertyAttribute?.CalledMethodNameBeforeSetProperty),
+						GetCalledMethod(viewModelType, patchingPropertyAttribute?.CalledMethodNameAfterSuccessSetProperty),
+						GetCalledMethod(viewModelType, patchingPropertyAttribute?.CalledMethodNameAfterSetProperty));
+				})
+				.ToArray();
 		}
 
 		private static void CheckViewModel(IHasType commandType, CommonType viewModelType) {
 			var errorsService = new ErrorsService();
 			foreach (var property in viewModelType.Properties) {
-				if (property.ContainsAttribute<PatchingPropertyAttribute>()) {
+				var patchingPropertyAttribute = property.GetReflectionAttribute<PatchingPropertyAttribute>();
+				if (patchingPropertyAttribute != null) {
 					if (property.IsInheritedFrom(commandType))
 						errorsService.AddError($"Patching property '{property.Name}' can not inherited from '{KnownTypeNames.ICommand}'");
 
 					if (property.ContainsAttribute<NotPatchingPropertyAttribute>())
 						errorsService.AddError($"Patching property '{property.Name}' can not have " +
 							$"'{nameof(PatchingPropertyAttribute)}' and '{nameof(NotPatchingPropertyAttribute)}' at the same time");
+
+					CheckCalledMethod(errorsService, viewModelType, patchingPropertyAttribute.CalledMethodNameBeforeGetProperty, property.Name);
+					CheckCalledMethod(errorsService, viewModelType, patchingPropertyAttribute.CalledMethodNameBeforeSetProperty, property.Name);
+					CheckCalledMethod(errorsService, viewModelType, patchingPropertyAttribute.CalledMethodNameAfterSuccessSetProperty, property.Name);
+					CheckCalledMethod(errorsService, viewModelType, patchingPropertyAttribute.CalledMethodNameAfterSetProperty, property.Name);
 				}
 
 				if (property.IsInheritedFrom(commandType))
@@ -91,6 +108,29 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Property {
 
 			if (errorsService.HasErrors)
 				throw new ViewModelPropertyPatchingException(errorsService);
+		}
+		private static void CheckCalledMethod(ErrorsService errorsService, IHasMethods viewModelType, string calledMethodName, string propertyName) {
+			if (calledMethodName.IsNullOrEmpty())
+				return;
+
+			var calledMethodsBeforeGetProperty = viewModelType.GetMethods(calledMethodName).ToArray();
+			switch (calledMethodsBeforeGetProperty.Length) {
+				case 0:
+					errorsService.AddError($"Not found called method with name '{calledMethodName}', " +
+						$"specified in '{nameof(PatchingPropertyAttribute)}' at property '{propertyName}'");
+					break;
+
+				case 1:
+					if (calledMethodsBeforeGetProperty.Single().ParameterTypes.Any())
+						errorsService.AddError($"Called method '{calledMethodName}' can not have parameters, " +
+							$"specified in '{nameof(PatchingPropertyAttribute)}' at property '{propertyName}'");
+					break;
+
+				default:
+					errorsService.AddError($"Found several called methods with name '{calledMethodName}', " +
+						$"specified in '{nameof(PatchingPropertyAttribute)}' at property '{propertyName}'");
+					break;
+			}
 		}
 
 		private CommonProperty[] GetPatchingProperties(IHasProperties viewModelType, IHasType commandType, ViewModelPatchingType patchingType) {
@@ -177,6 +217,10 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Property {
 
 			if (errorsService.HasErrors)
 				throw new ViewModelPropertyPatchingException(errorsService);
+		}
+
+		private static CommonMethod GetCalledMethod(IHasMethods viewModelType, string calledMethodName) {
+			return calledMethodName.IsNullOrEmpty() ? null : viewModelType.GetMethod(calledMethodName, true);
 		}
 	}
 }

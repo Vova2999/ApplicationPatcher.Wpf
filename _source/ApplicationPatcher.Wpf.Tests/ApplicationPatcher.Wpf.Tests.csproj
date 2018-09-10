@@ -40,10 +40,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ApplicationPatcher.Core">
-      <HintPath>..\..\..\ApplicationPatcher\Build\ApplicationPatcher.Core\ApplicationPatcher.Core.dll</HintPath>
+      <HintPath>..\..\core\Build\ApplicationPatcher.Core\ApplicationPatcher.Core.dll</HintPath>
     </Reference>
     <Reference Include="ApplicationPatcher.Tests">
-      <HintPath>..\..\..\ApplicationPatcher\Build\ApplicationPatcher.Tests\ApplicationPatcher.Tests.dll</HintPath>
+      <HintPath>..\..\core\Build\ApplicationPatcher.Tests\ApplicationPatcher.Tests.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\packages\Castle.Core.4.3.1\lib\net45\Castle.Core.dll</HintPath>
@@ -119,6 +119,7 @@
     <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithCanExecuteMethod.cs" />
     <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithNotPatchingViewModel.cs" />
     <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithSimpleCommands.cs" />
+    <Compile Include="Integration\ViewModels\Properties\ViewModelPropertiesTestsWithCalledMethods.cs" />
     <Compile Include="Integration\ViewModels\Properties\ViewModelPropertiesTestsWithFields.cs" />
     <Compile Include="Integration\ViewModels\Properties\ViewModelPropertiesTestsWithPatchingType.cs" />
     <Compile Include="Integration\ViewModels\Properties\ViewModelPropertiesTestsWithSimpleProperties.cs" />

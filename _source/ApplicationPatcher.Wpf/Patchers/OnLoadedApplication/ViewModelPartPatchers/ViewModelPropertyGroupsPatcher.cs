@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
@@ -53,8 +54,8 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 
 			var field = group.Field?.MonoCecil ?? CreateField(viewModelType, group.Property);
 
-			GenerateGetMethodBody(viewModelType, group.Property.MonoCecil, field);
-			GenerateSetMethodBody(assembly, viewModelBaseType, viewModelType, group.Property.MonoCecil, field);
+			GenerateGetMethodBody(viewModelType, group, field);
+			GenerateSetMethodBody(assembly, viewModelBaseType, viewModelType, group, field);
 		}
 
 		private void RemoveDefaultField(CommonType viewModelType, string propertyName) {
@@ -76,61 +77,88 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			return field;
 		}
 
-		private void GenerateGetMethodBody(CommonType viewModelType, PropertyDefinition property, FieldReference field) {
+		private void GenerateGetMethodBody(CommonType viewModelType, PropertyGroup group, FieldReference field) {
 			log.Info("Generate get method body...");
 
+			var property = group.Property;
 			if (property.GetMethod == null) {
 				log.Debug($"Create get accessor method for property '{property.Name}'");
-				var getMethod = new MethodDefinition($"get_{property.Name}", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, property.PropertyType);
+				var getMethod = new MethodDefinition($"get_{property.Name}", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, property.MonoCecil.PropertyType);
 
-				property.GetMethod = getMethod;
+				property.MonoCecil.GetMethod = getMethod;
 				viewModelType.MonoCecil.Methods.Add(getMethod);
 			}
 
-			property.GetMethod.Body.Variables.Clear();
+			property.MonoCecil.GetMethod.Body.Variables.Clear();
+			property.MonoCecil.GetMethod.Body.Instructions.Clear();
+			CreateCallMethodInstructions(group.CalledMethodBeforeGetProperty).ForEach(property.MonoCecil.GetMethod.Body.Instructions.Add);
+			property.MonoCecil.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+			property.MonoCecil.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldfld, field));
+			property.MonoCecil.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
-			property.GetMethod.Body.Instructions.Clear();
-			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldfld, field));
-			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-
-			property.GetMethod.RemoveAttributes<CompilerGeneratedAttribute>();
+			property.MonoCecil.GetMethod.RemoveAttributes<CompilerGeneratedAttribute>();
 
 			log.Info("Get method body was generated");
 		}
-		private void GenerateSetMethodBody(CommonAssembly assembly, IHasMethods viewModelBaseType, CommonType viewModelType, PropertyDefinition property, FieldReference field) {
+		private void GenerateSetMethodBody(CommonAssembly assembly, IHasMethods viewModelBaseType, CommonType viewModelType, PropertyGroup group, FieldReference field) {
 			log.Info("Generate set method body...");
 
+			var property = group.Property;
 			if (property.SetMethod == null) {
 				log.Debug($"Create set accessor method for property '{property.Name}'");
 				var setMethod = new MethodDefinition($"set_{property.Name}", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, assembly.MonoCecil.MainModule.TypeSystem.Void);
-				setMethod.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, property.PropertyType));
+				setMethod.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, property.MonoCecil.PropertyType));
 
-				property.SetMethod = setMethod;
+				property.MonoCecil.SetMethod = setMethod;
 				viewModelType.MonoCecil.Methods.Add(setMethod);
 			}
 
 			var setMethodFromViewModelBaseWithGeneric = new GenericInstanceMethod(viewModelBaseType.GetMethod("Set", new[] { typeof(string).FullName, "T&", "T", typeof(bool).FullName }, true).MonoCecil);
-			setMethodFromViewModelBaseWithGeneric.GenericArguments.Add(property.PropertyType);
+			setMethodFromViewModelBaseWithGeneric.GenericArguments.Add(property.MonoCecil.PropertyType);
 
 			var importedSetMethodFromViewModelBaseWithGeneric = assembly.MonoCecil.MainModule.ImportReference(setMethodFromViewModelBaseWithGeneric);
+			var callMethodAfterSetPropertyInstructions = CreateCallMethodInstructions(group.CalledMethodAfterSetProperty).ToArray();
 
-			property.GetMethod.Body.Variables.Clear();
+			property.MonoCecil.SetMethod.Body.Variables.Clear();
+			property.MonoCecil.SetMethod.Body.Instructions.Clear();
 
-			property.SetMethod.Body.Instructions.Clear();
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, property.Name));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldflda, field));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Call, importedSetMethodFromViewModelBaseWithGeneric));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Pop));
-			property.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+			CreateCallMethodInstructions(group.CalledMethodBeforeSetProperty).ForEach(property.MonoCecil.SetMethod.Body.Instructions.Add);
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, property.Name));
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldflda, field));
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+			property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Call, importedSetMethodFromViewModelBaseWithGeneric));
 
-			property.SetMethod.RemoveAttributes<CompilerGeneratedAttribute>();
+			var returnInstruction = Instruction.Create(OpCodes.Ret);
+			if (group.CalledMethodAfterSuccessSetProperty != null) {
+				var firstInstructionAfterJump = callMethodAfterSetPropertyInstructions.FirstOrDefault() ?? returnInstruction;
+				property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Brfalse_S, firstInstructionAfterJump));
+				CreateCallMethodInstructions(group.CalledMethodAfterSuccessSetProperty).ForEach(property.MonoCecil.SetMethod.Body.Instructions.Add);
+			}
+			else {
+				property.MonoCecil.SetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Pop));
+			}
+
+			callMethodAfterSetPropertyInstructions.ForEach(property.MonoCecil.SetMethod.Body.Instructions.Add);
+			property.MonoCecil.SetMethod.Body.Instructions.Add(returnInstruction);
+
+			property.MonoCecil.SetMethod.RemoveAttributes<CompilerGeneratedAttribute>();
 
 			log.Info("Set method body was generated");
+		}
+		private static IEnumerable<Instruction> CreateCallMethodInstructions(CommonMethod calledMethod) {
+			if (calledMethod == null)
+				yield break;
+
+			if (!calledMethod.MonoCecil.IsStatic)
+				yield return Instruction.Create(OpCodes.Ldarg_0);
+
+			yield return Instruction.Create(calledMethod.MonoCecil.IsAbstract || calledMethod.MonoCecil.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, calledMethod.MonoCecil);
+
+			if (calledMethod.ReturnType != typeof(void))
+				yield return Instruction.Create(OpCodes.Pop);
 		}
 	}
 }
