@@ -28,7 +28,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 
 		[Test]
 		public void ValidNames_WithPrefix_WithoutSuffix() {
-			var prefixes = new[] { "_", "Prefix", "Prefix_", "_Prefix_", "preifx", "prefix_", "_prefix_" };
+			var prefixes = new[] { "_", "Prefix", "Prefix_", "_Prefix_", "prefix", "prefix_", "_prefix_" };
 			prefixes.ForEach(prefix => CheckValidNames(prefix, null));
 		}
 

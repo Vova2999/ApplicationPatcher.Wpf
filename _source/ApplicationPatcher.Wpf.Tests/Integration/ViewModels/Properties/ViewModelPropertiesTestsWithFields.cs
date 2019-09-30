@@ -1,9 +1,11 @@
-﻿using ApplicationPatcher.Wpf.Types.Attributes.Connect;
+﻿using System.Diagnostics.CodeAnalysis;
+using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using FluentAssertions;
 using GalaSoft.MvvmLight;
 using NUnit.Framework;
 
 namespace ApplicationPatcher.Wpf.Tests.Integration.ViewModels.Properties {
+	[SuppressMessage("ReSharper", "InconsistentNaming")]
 	public class ViewModelWithFields : ViewModelBase {
 		public int firstProperty;
 		public int FirstProperty { get; set; }

@@ -1,9 +1,11 @@
-﻿using ApplicationPatcher.Core.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Wpf.Services.NameRules.Specific;
 using NUnit.Framework;
 
 namespace ApplicationPatcher.Wpf.Tests.Services.NameRules.Specific {
 	[TestFixture]
+	[SuppressMessage("ReSharper", "StringLiteralTypo")]
 	public class FirstUpperNameRulesTests : SpecificNameRulesServiceTestsBase {
 		public FirstUpperNameRulesTests() : base(new FirstUpperNameRules()) {
 		}

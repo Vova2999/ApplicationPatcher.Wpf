@@ -1,4 +1,5 @@
-﻿using ApplicationPatcher.Tests;
+﻿using System.Diagnostics.CodeAnalysis;
+using ApplicationPatcher.Tests;
 using ApplicationPatcher.Tests.FakeTypes;
 using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using ApplicationPatcher.Wpf.Types.Enums;
@@ -6,6 +7,7 @@ using NUnit.Framework;
 
 namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 	[TestFixture]
+	[SuppressMessage("ReSharper", "StringLiteralTypo")]
 	public class CommandGrouperServiceNamesTests : CommandGrouperServiceTestsBase {
 		[Test]
 		public void NotValidPatchingCommandMethodName_InvalidViewModel() {

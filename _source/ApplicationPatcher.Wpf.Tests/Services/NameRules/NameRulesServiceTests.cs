@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Wpf.Configurations;
@@ -9,6 +10,7 @@ using NUnit.Framework;
 
 namespace ApplicationPatcher.Wpf.Tests.Services.NameRules {
 	[TestFixture]
+	[SuppressMessage("ReSharper", "StringLiteralTypo")]
 	public class NameRulesServiceTests {
 		private NameRulesService nameRulesService;
 

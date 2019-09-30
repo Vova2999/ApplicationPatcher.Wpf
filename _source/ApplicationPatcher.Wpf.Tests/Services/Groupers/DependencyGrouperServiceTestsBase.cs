@@ -51,10 +51,10 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 		protected void CheckValidFrameworkElement(ICommonType frameworkElementType,
 												  FrameworkElementPatchingType frameworkElementPatchingType,
 												  bool skipConnectingByNameIfNameIsInvalid,
-												  bool connectByNameIfExsistConnectAttribute,
+												  bool connectByNameIfExistConnectAttribute,
 												  params (string PropertyName, string FieldName)[] expectedGroups) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExistConnectAttribute;
 			var groups = dependencyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, frameworkElementType, frameworkElementPatchingType);
 
 			if (groups.Any())
@@ -89,9 +89,9 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 													FrameworkElementPatchingType frameworkElementPatchingType,
 													string errorMessage,
 													bool skipConnectingByNameIfNameIsInvalid,
-													bool connectByNameIfExsistConnectAttribute) {
+													bool connectByNameIfExistConnectAttribute) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExistConnectAttribute;
 
 			try {
 				dependencyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, frameworkElementType, frameworkElementPatchingType);

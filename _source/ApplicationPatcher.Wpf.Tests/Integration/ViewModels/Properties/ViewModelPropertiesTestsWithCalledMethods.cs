@@ -1,4 +1,5 @@
-﻿using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
+﻿using System.Diagnostics.CodeAnalysis;
+using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
 using ApplicationPatcher.Wpf.Types.Attributes.ViewModel;
 using ApplicationPatcher.Wpf.Types.Enums;
 using FluentAssertions;
@@ -93,6 +94,7 @@ namespace ApplicationPatcher.Wpf.Tests.Integration.ViewModels.Properties {
 		}
 
 		[Test]
+		[SuppressMessage("ReSharper", "AssignmentIsFullyDiscarded")]
 		public void Property0Test() {
 			var viewModel = CreateViewModel<ViewModelWithCalledMethods>();
 
@@ -107,9 +109,9 @@ namespace ApplicationPatcher.Wpf.Tests.Integration.ViewModels.Properties {
 			ViewModelWithCalledMethods.CalledMethodAfterSuccessSetPropertyExecutionCount.Should().Be(0);
 			ViewModelWithCalledMethods.CalledMethodAfterSetPropertyExecutionCount.Should().Be(0);
 
-			var viewModelProperty0 = viewModel.Property0;
-			viewModelProperty0 = viewModel.Property0;
-			viewModelProperty0 = viewModel.Property0;
+			_ = viewModel.Property0;
+			_ = viewModel.Property0;
+			_ = viewModel.Property0;
 
 			CheckChangedProperties(nameof(viewModel.Property0), nameof(viewModel.Property0), nameof(viewModel.Property0));
 			viewModel.CalledMethodBeforeGetPropertyExecutionCount.Should().Be(3);

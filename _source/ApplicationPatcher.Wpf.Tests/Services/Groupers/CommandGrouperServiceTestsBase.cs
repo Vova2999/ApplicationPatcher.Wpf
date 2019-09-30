@@ -51,10 +51,10 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 		protected void CheckValidViewModel(ICommonType viewModelType,
 										   ViewModelPatchingType viewModelPatchingType,
 										   bool skipConnectingByNameIfNameIsInvalid,
-										   bool connectByNameIfExsistConnectAttribute,
+										   bool connectByNameIfExistConnectAttribute,
 										   params (string ExecuteMethodName, string CanExecuteMethodName, string PropertyName, string FieldName)[] expectedGroups) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExistConnectAttribute;
 			var groups = commandGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
 
 			if (groups.Any())
@@ -93,9 +93,9 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 											 ViewModelPatchingType viewModelPatchingType,
 											 string errorMessage,
 											 bool skipConnectingByNameIfNameIsInvalid,
-											 bool connectByNameIfExsistConnectAttribute) {
+											 bool connectByNameIfExistConnectAttribute) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExistConnectAttribute;
 
 			try {
 				commandGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
