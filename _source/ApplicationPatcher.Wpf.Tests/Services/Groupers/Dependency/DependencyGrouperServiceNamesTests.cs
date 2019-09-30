@@ -27,7 +27,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 				FrameworkElementPatchingType.All,
 				$"Not valid patching property name '{patchingFirstPropertyName}'");
 
-			CheckValidFrameworkElement(firstFrameworkElementType, FrameworkElementPatchingType.Selectively, false, false);
+			CheckValidFrameworkElement(firstFrameworkElementType, FrameworkElementPatchingType.Selectively);
 
 			CheckValidFrameworkElement(secondFrameworkElementType, FrameworkElementPatchingType.All, true, false);
 			CheckValidFrameworkElement(secondFrameworkElementType, FrameworkElementPatchingType.Selectively, true, false);
@@ -49,8 +49,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
 				.Build();
 
-			CheckValidFrameworkElement(viewModelType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, null));
-			CheckValidFrameworkElement(viewModelType, FrameworkElementPatchingType.Selectively, false, false);
+			CheckValidFrameworkElement(viewModelType, FrameworkElementPatchingType.All, (patchingPropertyName, null));
+			CheckValidFrameworkElement(viewModelType, FrameworkElementPatchingType.Selectively);
 		}
 	}
 }

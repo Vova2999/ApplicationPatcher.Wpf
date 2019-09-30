@@ -5,10 +5,6 @@ using FluentAssertions;
 using GalaSoft.MvvmLight;
 using NUnit.Framework;
 
-// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable MemberCanBePrivate.Global
-
 namespace ApplicationPatcher.Wpf.Tests.Integration.ViewModels.Properties {
 	[PatchingViewModel(ViewModelPatchingType.Selectively)]
 	public class ViewModelWithCalledMethods : ViewModelBase {
@@ -111,11 +107,8 @@ namespace ApplicationPatcher.Wpf.Tests.Integration.ViewModels.Properties {
 			ViewModelWithCalledMethods.CalledMethodAfterSuccessSetPropertyExecutionCount.Should().Be(0);
 			ViewModelWithCalledMethods.CalledMethodAfterSetPropertyExecutionCount.Should().Be(0);
 
-			// ReSharper disable once NotAccessedVariable
 			var viewModelProperty0 = viewModel.Property0;
-			// ReSharper disable once RedundantAssignment
 			viewModelProperty0 = viewModel.Property0;
-			// ReSharper disable once RedundantAssignment
 			viewModelProperty0 = viewModel.Property0;
 
 			CheckChangedProperties(nameof(viewModel.Property0), nameof(viewModel.Property0), nameof(viewModel.Property0));

@@ -3,10 +3,6 @@ using FluentAssertions;
 using GalaSoft.MvvmLight;
 using NUnit.Framework;
 
-#pragma warning disable IDE0044
-// ReSharper disable InconsistentNaming
-// ReSharper disable UnassignedField.Global
-
 namespace ApplicationPatcher.Wpf.Tests.Integration.ViewModels.Properties {
 	public class ViewModelWithFields : ViewModelBase {
 		public int firstProperty;

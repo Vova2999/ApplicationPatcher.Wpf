@@ -4,7 +4,7 @@ using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Helpers;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Services;
@@ -26,14 +26,14 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Patching framework element types...");
 
 			var selectingType = assembly.GetReflectionAttribute<SelectingFrameworkElementAttribute>()?.SelectingType
 				?? applicationPatcherWpfConfiguration.DefaultFrameworkElementSelectingType;
 			log.Info($"Framework element selecting type: '{selectingType}'");
 
-			var frameworkElementBaseType = assembly.GetCommonType(KnownTypeNames.FrameworkElement, true);
+			var frameworkElementBaseType = assembly.GetCommonType(KnownTypeNames.FrameworkElement, true).Load();
 			CheckAssembly(assembly, frameworkElementBaseType);
 
 			var frameworkElementTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(frameworkElementBaseType).ToArray();
@@ -46,8 +46,8 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			log.Debug("Framework element types found:", frameworkElementTypes.Select(frameworkElement => frameworkElement.FullName).OrderBy(fullName => fullName));
 
 			var patchingFrameworkElementTypes = frameworkElementTypes
-				.Where(frameworkElementType => frameworkElementType.NotContainsAttribute<NotPatchingFrameworkElementAttribute>() &&
-					(selectingType == FrameworkElementSelectingType.All || frameworkElementType.ContainsAttribute<PatchingFrameworkElementAttribute>()))
+				.Where(frameworkElementType => frameworkElementType.NotContainsReflectionAttribute<NotPatchingFrameworkElementAttribute>() &&
+					(selectingType == FrameworkElementSelectingType.All || frameworkElementType.ContainsReflectionAttribute<PatchingFrameworkElementAttribute>()))
 				.ToArray();
 
 			if (!patchingFrameworkElementTypes.Any()) {
@@ -70,9 +70,9 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			return PatchResult.Continue;
 		}
 
-		private static void CheckAssembly(CommonAssembly assembly, CommonType frameworkElementBaseType) {
-			var typesWithPatchingFrameworkElementAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsAttribute<PatchingFrameworkElementAttribute>()).ToArray();
-			var typesWithNotPatchingFrameworkElementAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsAttribute<NotPatchingFrameworkElementAttribute>()).ToArray();
+		private static void CheckAssembly(ICommonAssembly assembly, ICommonType frameworkElementBaseType) {
+			var typesWithPatchingFrameworkElementAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsReflectionAttribute<PatchingFrameworkElementAttribute>()).ToArray();
+			var typesWithNotPatchingFrameworkElementAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsReflectionAttribute<NotPatchingFrameworkElementAttribute>()).ToArray();
 
 			var errorsService = new ErrorsService()
 				.AddErrors(typesWithPatchingFrameworkElementAttribute
@@ -93,9 +93,9 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 		}
 
 		[AddLogOffset]
-		private PatchResult PatchFrameworkElement(CommonAssembly assembly, CommonType frameworkElementType) {
+		private PatchResult PatchFrameworkElement(ICommonAssembly assembly, ICommonType frameworkElementType) {
 			log.Info($"Loading type '{frameworkElementType.FullName}'...");
-			frameworkElementType.Load();
+			frameworkElementType.Load(1);
 			log.Info($"Type '{frameworkElementType.FullName}' was loaded");
 
 			var patchingType = frameworkElementType.GetReflectionAttribute<PatchingFrameworkElementAttribute>()?.PatchingType

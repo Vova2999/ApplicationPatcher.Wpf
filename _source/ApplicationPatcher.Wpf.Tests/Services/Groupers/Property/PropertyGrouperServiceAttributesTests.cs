@@ -33,8 +33,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new PatchingPropertyAttribute())
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, null));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (patchingPropertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, null));
 		}
 
 		[Test]
@@ -62,8 +62,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new NotPatchingPropertyAttribute())
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false);
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 
 		[Test]
@@ -94,8 +94,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingFieldName, typeof(int))
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -126,8 +126,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingFieldName, typeof(int), new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -177,11 +177,11 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingFieldName, typeof(int))
 				.Build();
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -231,11 +231,11 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingFieldName, typeof(int), new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.Build();
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 	}
 }

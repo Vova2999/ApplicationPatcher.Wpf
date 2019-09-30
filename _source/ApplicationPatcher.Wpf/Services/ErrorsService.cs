@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-// ReSharper disable UnusedMethodReturnValue.Global
-
 namespace ApplicationPatcher.Wpf.Services {
 	public class ErrorsService {
 		public bool HasErrors => errors.Any();

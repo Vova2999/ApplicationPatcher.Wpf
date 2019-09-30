@@ -1,8 +1,6 @@
 ﻿using ApplicationPatcher.Core;
 using ApplicationPatcher.Wpf.Types.Enums;
 
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-
 namespace ApplicationPatcher.Wpf.Configurations {
 	public class ApplicationPatcherWpfConfiguration : ConfigurationFile<ApplicationPatcherWpfConfiguration> {
 		protected override string ConfigurationFileName => "ApplicationPatcher.Wpf.config.xml";
@@ -16,7 +14,7 @@ namespace ApplicationPatcher.Wpf.Configurations {
 		public NameRules CommandExecuteMethodNameRules { get; set; }
 		public NameRules CommandCanExecuteMethodNameRules { get; set; }
 		public bool SkipConnectingByNameIfNameIsInvalid { get; set; }
-		public bool ConnectByNameIfExsistConnectAttribute { get; set; }
+		public bool ConnectByNameIfExistConnectAttribute { get; set; }
 		public ViewModelPatchingType DefaultViewModelPatchingType { get; set; }
 		public ViewModelSelectingType DefaultViewModelSelectingType { get; set; }
 		public FrameworkElementPatchingType DefaultFrameworkElementPatchingType { get; set; }

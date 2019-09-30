@@ -23,22 +23,14 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, true, false);
 			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, true, false);
 
-			CheckInvalidViewModel(firstViewModelType,
-				ViewModelPatchingType.All,
-				$"Not valid patching property name '{patchingFirstPropertyName}'");
-
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckInvalidViewModel(firstViewModelType, ViewModelPatchingType.All, $"Not valid patching property name '{patchingFirstPropertyName}'");
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
 
 			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, true, false);
 			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, true, false);
 
-			CheckInvalidViewModel(secondViewModelType,
-				ViewModelPatchingType.All,
-				$"Not valid patching property name '{patchingSecondPropertyName}'");
-
-			CheckInvalidViewModel(secondViewModelType,
-				ViewModelPatchingType.Selectively,
-				$"Not valid patching property name '{patchingSecondPropertyName}'");
+			CheckInvalidViewModel(secondViewModelType, ViewModelPatchingType.All, $"Not valid patching property name '{patchingSecondPropertyName}'");
+			CheckInvalidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, $"Not valid patching property name '{patchingSecondPropertyName}'");
 		}
 
 		[Test]
@@ -49,8 +41,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet)
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, null));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (patchingPropertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 	}
 }

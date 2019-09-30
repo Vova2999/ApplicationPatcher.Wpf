@@ -4,7 +4,7 @@ using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Helpers;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Services;
@@ -26,14 +26,14 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Patching view model types...");
 
 			var selectingType = assembly.GetReflectionAttribute<SelectingViewModelAttribute>()?.SelectingType
 				?? applicationPatcherWpfConfiguration.DefaultViewModelSelectingType;
 			log.Info($"View model selecting type: '{selectingType}'");
 
-			var viewModelBaseType = assembly.GetCommonType(KnownTypeNames.ViewModelBase).Load();
+			var viewModelBaseType = assembly.GetCommonType(KnownTypeNames.ViewModelBase, true).Load();
 			CheckAssembly(assembly, viewModelBaseType);
 
 			var viewModelTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(viewModelBaseType).ToArray();
@@ -45,8 +45,8 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			log.Debug("View model types found:", viewModelTypes.Select(viewModel => viewModel.FullName).OrderBy(fullName => fullName));
 
 			var patchingViewModelTypes = viewModelTypes
-				.Where(viewModelType => viewModelType.NotContainsAttribute<NotPatchingViewModelAttribute>() &&
-					(selectingType == ViewModelSelectingType.All || viewModelType.ContainsAttribute<PatchingViewModelAttribute>()))
+				.Where(viewModelType => viewModelType.NotContainsReflectionAttribute<NotPatchingViewModelAttribute>() &&
+					(selectingType == ViewModelSelectingType.All || viewModelType.ContainsReflectionAttribute<PatchingViewModelAttribute>()))
 				.ToArray();
 
 			if (!patchingViewModelTypes.Any()) {
@@ -69,9 +69,9 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 			return PatchResult.Continue;
 		}
 
-		private static void CheckAssembly(CommonAssembly assembly, CommonType viewModelBaseType) {
-			var typesWithPatchingViewModelAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsAttribute<PatchingViewModelAttribute>()).ToArray();
-			var typesWithNotPatchingViewModelAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsAttribute<NotPatchingViewModelAttribute>()).ToArray();
+		private static void CheckAssembly(ICommonAssembly assembly, ICommonType viewModelBaseType) {
+			var typesWithPatchingViewModelAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsReflectionAttribute<PatchingViewModelAttribute>()).ToArray();
+			var typesWithNotPatchingViewModelAttribute = assembly.TypesFromThisAssembly.Where(type => type.ContainsReflectionAttribute<NotPatchingViewModelAttribute>()).ToArray();
 
 			var errorsService = new ErrorsService()
 				.AddErrors(typesWithPatchingViewModelAttribute
@@ -92,9 +92,9 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication {
 		}
 
 		[AddLogOffset]
-		private PatchResult PatchViewModel(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType) {
+		private PatchResult PatchViewModel(ICommonAssembly assembly, ICommonType viewModelBaseType, ICommonType viewModelType) {
 			log.Info($"Loading type '{viewModelType.FullName}'...");
-			viewModelType.Load();
+			viewModelType.Load(1);
 			log.Info($"Type '{viewModelType.FullName}' was loaded");
 
 			var patchingType = viewModelType.GetReflectionAttribute<PatchingViewModelAttribute>()?.PatchingType

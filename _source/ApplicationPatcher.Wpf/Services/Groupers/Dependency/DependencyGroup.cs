@@ -1,11 +1,11 @@
-﻿using ApplicationPatcher.Core.Types.CommonMembers;
+﻿using ApplicationPatcher.Core.Types.CommonInterfaces;
 
 namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 	public class DependencyGroup {
-		public readonly CommonField Field;
-		public readonly CommonProperty Property;
+		public readonly ICommonField Field;
+		public readonly ICommonProperty Property;
 
-		public DependencyGroup(CommonField field, CommonProperty property) {
+		public DependencyGroup(ICommonField field, ICommonProperty property) {
 			Field = field;
 			Property = property;
 		}

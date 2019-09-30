@@ -33,8 +33,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 				.AddProperty(patchingPropertyName, typeof(int), PropertyMethods.HasGetAndSet, new PatchingPropertyAttribute())
 				.Build();
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, null));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, null));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, null));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, null));
 		}
 
 		[Test]
@@ -70,8 +70,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -104,8 +104,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -139,8 +139,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -176,8 +176,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -212,8 +212,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -249,8 +249,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -286,8 +286,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Dependency {
 
 			SetStaticField(frameworkElementType, patchingFieldName);
 
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidFrameworkElement(frameworkElementType, FrameworkElementPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 	}
 }

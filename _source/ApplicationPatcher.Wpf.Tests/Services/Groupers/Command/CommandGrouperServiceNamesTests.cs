@@ -36,7 +36,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				ViewModelPatchingType.All,
 				$"Not valid patching command method name '{firstExecuteMethodName}'");
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
 
 			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, true, false);
 			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, true, false);
@@ -45,7 +45,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				ViewModelPatchingType.All,
 				$"Not valid patching command method name '{secondExecuteMethodName}'");
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively);
 
 			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.All, true, false);
 			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, true, false);
@@ -54,7 +54,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				ViewModelPatchingType.All,
 				$"Not valid patching command method name '{thirdExecuteMethodName}'");
 
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively);
 		}
 
 		[Test]
@@ -67,8 +67,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				.AddMethod(executeMethodName, typeof(void), null)
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (executeMethodName, null, propertyName, null));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (executeMethodName, null, propertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 
 		[Test]
@@ -145,8 +145,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				.AddMethod(canExecuteMethodName, typeof(bool), null)
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (executeMethodName, canExecuteMethodName, propertyName, fieldName));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (executeMethodName, canExecuteMethodName, propertyName, fieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 
 		[Test]
@@ -159,8 +159,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				.AddMethod(executeMethodName, typeof(void), null)
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (executeMethodName, null, null, fieldName));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (executeMethodName, null, null, fieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 	}
 }

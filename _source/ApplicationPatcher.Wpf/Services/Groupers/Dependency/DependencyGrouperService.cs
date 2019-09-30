@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Core.Types.CommonMembers;
-using ApplicationPatcher.Core.Types.Interfaces;
+using ApplicationPatcher.Core.Types.BaseInterfaces;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
 using ApplicationPatcher.Wpf.Extensions;
@@ -21,7 +21,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 			this.nameRulesService = nameRulesService;
 		}
 
-		public DependencyGroup[] GetGroups(CommonAssembly assembly, CommonType frameworkElementType, FrameworkElementPatchingType patchingType) {
+		public DependencyGroup[] GetGroups(ICommonAssembly assembly, ICommonType frameworkElementType, FrameworkElementPatchingType patchingType) {
 			var dependencyPropertyType = assembly.GetCommonType(KnownTypeNames.DependencyProperty, true);
 			CheckFrameworkElement(frameworkElementType, dependencyPropertyType);
 
@@ -34,14 +34,14 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 			return patchingDependencyGroups.Select(group => new DependencyGroup(group.Fields.SingleOrDefault(), group.Property)).ToArray();
 		}
 
-		private static void CheckFrameworkElement(CommonType frameworkElementType, CommonType dependencyPropertyType) {
+		private static void CheckFrameworkElement(ICommonType frameworkElementType, ICommonType dependencyPropertyType) {
 			var errorsService = new ErrorsService();
 			foreach (var property in frameworkElementType.Properties) {
 				if (property.ContainsAttribute<PatchingPropertyAttribute>() && property.ContainsAttribute<NotPatchingPropertyAttribute>())
 					errorsService.AddError($"Patching property '{property.Name}' can not have " +
 						$"'{nameof(PatchingPropertyAttribute)}' and '{nameof(NotPatchingPropertyAttribute)}' at the same time");
 
-				var connectPropertyToDependencyAttributes = property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>().ToArray();
+				var connectPropertyToDependencyAttributes = property.GetCastedAttributes<ConnectPropertyToFieldAttribute>().ToArray();
 				if (!connectPropertyToDependencyAttributes.Any())
 					continue;
 
@@ -70,7 +70,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 			}
 
 			foreach (var field in frameworkElementType.Fields) {
-				var connectDependencyToPropertyAttributes = field.GetReflectionAttributes<ConnectFieldToPropertyAttribute>().ToArray();
+				var connectDependencyToPropertyAttributes = field.GetCastedAttributes<ConnectFieldToPropertyAttribute>().ToArray();
 				if (!connectDependencyToPropertyAttributes.Any())
 					continue;
 
@@ -95,7 +95,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 				throw new FrameworkElementDependencyPatchingException(errorsService);
 		}
 
-		private CommonProperty[] GetPatchingProperties(IHasProperties frameworkElementType, FrameworkElementPatchingType patchingType) {
+		private ICommonProperty[] GetPatchingProperties(IHasProperties frameworkElementType, FrameworkElementPatchingType patchingType) {
 			return frameworkElementType.Properties
 				.Where(property => property.NotContainsAttribute<NotPatchingPropertyAttribute>() &&
 					(!applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid || nameRulesService.IsNameValid(property.Name, UseNameRulesFor.DependencyProperty)) && (
@@ -105,10 +105,10 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 				.ToArray();
 		}
 
-		private void CheckPatchingPropertyNames(IEnumerable<CommonProperty> patchingProperties) {
+		private void CheckPatchingPropertyNames(IEnumerable<ICommonProperty> patchingProperties) {
 			var propertiesWithUseSearchByName = patchingProperties
 				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
 
 			var errorsService = new ErrorsService()
 				.AddErrors(propertiesWithUseSearchByName
@@ -119,7 +119,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 				throw new FrameworkElementDependencyPatchingException(errorsService);
 		}
 
-		private List<(CommonProperty Property, List<CommonField> Fields)> GetPatchingDependencyGroups(IEnumerable<CommonProperty> patchingProperties, CommonType frameworkElementType) {
+		private List<(ICommonProperty Property, List<ICommonField> Fields)> GetPatchingDependencyGroups(IEnumerable<ICommonProperty> patchingProperties, ICommonType frameworkElementType) {
 			var patchingDependencyGroups = patchingProperties.Select(CreateEmptyPatchingDependencyGroup).ToList();
 
 			AddGroupsByPropertyName(patchingDependencyGroups, frameworkElementType);
@@ -128,33 +128,33 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Dependency {
 
 			return patchingDependencyGroups;
 		}
-		private static (CommonProperty Property, List<CommonField> Fields) CreateEmptyPatchingDependencyGroup(CommonProperty property) {
-			return (property, new List<CommonField>());
+		private static (ICommonProperty Property, List<ICommonField> Fields) CreateEmptyPatchingDependencyGroup(ICommonProperty property) {
+			return (property, new List<ICommonField>());
 		}
-		private void AddGroupsByPropertyName(ICollection<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, IHasFields frameworkElementType) {
+		private void AddGroupsByPropertyName(ICollection<(ICommonProperty Property, List<ICommonField> Fields)> patchingDependencyGroups, IHasFields frameworkElementType) {
 			var propertiesWithUseSearchByName = patchingDependencyGroups.Select(group => group.Property)
 				.Where(property => property.NotContainsAttribute<NotUseSearchByNameAttribute>() &&
-					(applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
+					(applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute || property.NotContainsAttribute<ConnectPropertyToFieldAttribute>()));
 
 			foreach (var property in propertiesWithUseSearchByName) {
 				if (frameworkElementType.TryGetField(nameRulesService.ConvertName(property.Name, UseNameRulesFor.DependencyProperty, UseNameRulesFor.DependencyField), out var field))
 					patchingDependencyGroups.GetOrAdd(group => group.Property == property, () => CreateEmptyPatchingDependencyGroup(property)).Fields.AddIfNotContains(field);
 			}
 		}
-		private static void AddGroupsFromConnectPropertyToDependencyAttribute(ICollection<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, CommonType frameworkElementType) {
+		private static void AddGroupsFromConnectPropertyToDependencyAttribute(ICollection<(ICommonProperty Property, List<ICommonField> Fields)> patchingDependencyGroups, ICommonType frameworkElementType) {
 			foreach (var property in frameworkElementType.Properties) {
-				foreach (var field in property.GetReflectionAttributes<ConnectPropertyToFieldAttribute>().Select(attribute => frameworkElementType.GetField(attribute.ConnectingFieldName, true)))
+				foreach (var field in property.GetCastedAttributes<ConnectPropertyToFieldAttribute>().Select(attribute => frameworkElementType.GetField(attribute.ConnectingFieldName, true)))
 					patchingDependencyGroups.GetOrAdd(group => group.Property == property, () => CreateEmptyPatchingDependencyGroup(property)).Fields.AddIfNotContains(field);
 			}
 		}
-		private static void AddGroupsFromConnectDependencyToPropertyAttribute(ICollection<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, CommonType frameworkElementType) {
+		private static void AddGroupsFromConnectDependencyToPropertyAttribute(ICollection<(ICommonProperty Property, List<ICommonField> Fields)> patchingDependencyGroups, ICommonType frameworkElementType) {
 			foreach (var field in frameworkElementType.Fields) {
-				foreach (var property in field.GetReflectionAttributes<ConnectFieldToPropertyAttribute>().Select(attribute => frameworkElementType.GetProperty(attribute.ConnectingPropertyName, true)))
+				foreach (var property in field.GetCastedAttributes<ConnectFieldToPropertyAttribute>().Select(attribute => frameworkElementType.GetProperty(attribute.ConnectingPropertyName, true)))
 					patchingDependencyGroups.GetOrAdd(group => group.Property == property, () => CreateEmptyPatchingDependencyGroup(property)).Fields.AddIfNotContains(field);
 			}
 		}
 
-		private static void CheckPatchingPropertyGroups(IEnumerable<(CommonProperty Property, List<CommonField> Fields)> patchingDependencyGroups, CommonType dependencyPropertyType) {
+		private static void CheckPatchingPropertyGroups(IEnumerable<(ICommonProperty Property, List<ICommonField> Fields)> patchingDependencyGroups, ICommonType dependencyPropertyType) {
 			var errorsService = new ErrorsService();
 			foreach (var group in patchingDependencyGroups) {
 				switch (group.Fields.Count) {

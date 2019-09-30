@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Tests;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
@@ -18,7 +18,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 		private FakeCommonAssemblyBuilder fakeCommonAssemblyBuilder;
 		private DependencyGrouperService dependencyGrouperService;
 
-		protected CommonType DependencyPropertyType;
+		protected ICommonType DependencyPropertyType;
 
 		[OneTimeSetUp]
 		public void OneTimeSetUp() {
@@ -40,17 +40,21 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 			FakeCommonTypeBuilder.ClearCreatedTypes();
 		}
 
-		protected static void SetStaticField(CommonType frameworkElementType, string patchingFieldName) {
+		protected static void SetStaticField(ICommonType frameworkElementType, string patchingFieldName) {
 			FakeCommonTypeBuilder.GetMockFor(frameworkElementType.GetField(patchingFieldName, true).MonoCecil).Setup(field => field.IsStatic).Returns(true);
 		}
 
-		protected void CheckValidFrameworkElement(CommonType frameworkElementType,
+		protected void CheckValidFrameworkElement(ICommonType frameworkElementType, FrameworkElementPatchingType frameworkElementPatchingType, params (string PropertyName, string FieldName)[] expectedGroups) {
+			CheckValidFrameworkElement(frameworkElementType, frameworkElementPatchingType, false, false, expectedGroups);
+		}
+
+		protected void CheckValidFrameworkElement(ICommonType frameworkElementType,
 												  FrameworkElementPatchingType frameworkElementPatchingType,
 												  bool skipConnectingByNameIfNameIsInvalid,
 												  bool connectByNameIfExsistConnectAttribute,
 												  params (string PropertyName, string FieldName)[] expectedGroups) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExsistConnectAttribute;
 			var groups = dependencyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, frameworkElementType, frameworkElementPatchingType);
 
 			if (groups.Any())
@@ -77,13 +81,17 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 				actualName.Should().Be(expectedName);
 		}
 
-		protected void CheckInvalidFrameworkElement(CommonType frameworkElementType,
+		protected void CheckInvalidFrameworkElement(ICommonType frameworkElementType, FrameworkElementPatchingType frameworkElementPatchingType, string errorMessage) {
+			CheckInvalidFrameworkElement(frameworkElementType, frameworkElementPatchingType, errorMessage, false, false);
+		}
+
+		protected void CheckInvalidFrameworkElement(ICommonType frameworkElementType,
 													FrameworkElementPatchingType frameworkElementPatchingType,
 													string errorMessage,
-													bool skipConnectingByNameIfNameIsInvalid = false,
-													bool connectByNameIfExsistConnectAttribute = false) {
+													bool skipConnectingByNameIfNameIsInvalid,
+													bool connectByNameIfExsistConnectAttribute) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExsistConnectAttribute;
 
 			try {
 				dependencyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, frameworkElementType, frameworkElementPatchingType);

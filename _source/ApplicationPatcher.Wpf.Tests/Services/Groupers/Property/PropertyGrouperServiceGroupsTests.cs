@@ -27,7 +27,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				ViewModelPatchingType.All,
 				$"Not found field for property '{patchingPropertyName}' when using '{nameof(NotUseSearchByNameAttribute)}'");
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.All,
@@ -53,11 +53,11 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingFieldName, typeof(int), new ConnectFieldToPropertyAttribute(patchingPropertyName))
 				.Build();
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFieldName));
 		}
 
 		[Test]
@@ -114,7 +114,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				ViewModelPatchingType.All,
 				$"Multi-connect property to field found: property '{patchingPropertyName}', fields: '{patchingSecondFieldName}', '{patchingFirstFieldName}'");
 
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFirstFieldName));
 
 			CheckInvalidViewModel(fourthViewModelType,
 				ViewModelPatchingType.All,
@@ -149,14 +149,14 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingSecondFieldName, typeof(int))
 				.Build();
 
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingSecondFieldName));
-			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingSecondFieldName));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively);
 
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFirstFieldName));
-			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFirstFieldName));
 
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFirstFieldName));
-			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, false, false, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFirstFieldName));
+			CheckValidViewModel(thirdViewModelType, ViewModelPatchingType.Selectively, (patchingPropertyName, patchingFirstFieldName));
 		}
 
 		[Test]
@@ -173,7 +173,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				ViewModelPatchingType.All,
 				$"Types do not match inside group: property '{patchingPropertyName}', field '{patchingFieldName}'");
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 
 		[Test]
@@ -186,8 +186,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Property {
 				.AddField(patchingFieldName, typeof(int))
 				.Build();
 
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, false, false, (patchingPropertyName, patchingFieldName));
-			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, false, false);
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (patchingPropertyName, patchingFieldName));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively);
 		}
 	}
 }

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Helpers;
 using ApplicationPatcher.Wpf.Services.Groupers.Dependency;
@@ -22,20 +22,20 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 		private readonly NameRulesService nameRulesService;
 		private readonly ILog log;
 
-		private readonly ExtendedLazy<CommonAssembly, CommonType> dependencyPropertyType =
-			new ExtendedLazy<CommonAssembly, CommonType>(assembly => assembly.GetCommonType(KnownTypeNames.DependencyProperty, true));
+		private readonly ExtendedLazy<ICommonAssembly, ICommonType> dependencyPropertyType =
+			new ExtendedLazy<ICommonAssembly, ICommonType>(assembly => assembly.GetCommonType(KnownTypeNames.DependencyProperty, true));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> getTypeFromHandleMethod =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Type), true).GetMethod("GetTypeFromHandle", new[] { typeof(RuntimeTypeHandle) }, true).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> getTypeFromHandleMethod =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Type), true).Load().GetMethod("GetTypeFromHandle", new[] { typeof(RuntimeTypeHandle) }, true).MonoCecil));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> registerMethod =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.DependencyProperty, true).GetMethod("Register", new[] { typeof(string), typeof(Type), typeof(Type) }, true).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> registerMethod =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.DependencyProperty, true).Load().GetMethod("Register", new[] { typeof(string), typeof(Type), typeof(Type) }, true).MonoCecil));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> getValueMethod =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.DependencyObject, true).GetMethod("GetValue", new[] { assembly.GetCommonType(KnownTypeNames.DependencyProperty, true).Type }).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> getValueMethod =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.DependencyObject, true).Load().GetMethod("GetValue", new[] { assembly.GetCommonType(KnownTypeNames.DependencyProperty, true).Type }).MonoCecil));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> setValueMethod =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.DependencyObject, true).GetMethod("SetValue", new[] { assembly.GetCommonType(KnownTypeNames.DependencyProperty, true).Type, typeof(object) }).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> setValueMethod =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.DependencyObject, true).Load().GetMethod("SetValue", new[] { assembly.GetCommonType(KnownTypeNames.DependencyProperty, true).Type, typeof(object) }).MonoCecil));
 
 		public FrameworkElementDependencyPatcher(DependencyGrouperService dependencyGrouperService, NameRulesService nameRulesService) {
 			this.dependencyGrouperService = dependencyGrouperService;
@@ -43,7 +43,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly, CommonType frameworkElementType, FrameworkElementPatchingType patchingType) {
+		public override PatchResult Patch(ICommonAssembly assembly, ICommonType frameworkElementType, FrameworkElementPatchingType patchingType) {
 			log.Info("Patching dependency groups...");
 
 			var propertyGroups = dependencyGrouperService.GetGroups(assembly, frameworkElementType, patchingType);
@@ -65,7 +65,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 		}
 
 		[AddLogOffset]
-		private void PatchGroup(CommonAssembly assembly, CommonType frameworkElementType, DependencyGroup group) {
+		private void PatchGroup(ICommonAssembly assembly, ICommonType frameworkElementType, DependencyGroup group) {
 			RemoveDefaultField(frameworkElementType, group.Property.Name);
 
 			var field = group.Field?.MonoCecil ?? CreateField(assembly, frameworkElementType, group.Property);
@@ -74,7 +74,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 			GenerateSetMethodBody(assembly, frameworkElementType, group.Property.MonoCecil, field);
 		}
 
-		private void RemoveDefaultField(CommonType frameworkElementType, string propertyName) {
+		private void RemoveDefaultField(ICommonType frameworkElementType, string propertyName) {
 			var defaultFieldName = $"<{propertyName}>k__BackingField";
 			if (!frameworkElementType.TryGetField(defaultFieldName, out var defaultField))
 				return;
@@ -83,7 +83,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 			frameworkElementType.MonoCecil.Fields.Remove(defaultField.MonoCecil);
 		}
 
-		private FieldDefinition CreateField(CommonAssembly assembly, CommonType frameworkElementType, CommonProperty property) {
+		private FieldDefinition CreateField(ICommonAssembly assembly, ICommonType frameworkElementType, ICommonProperty property) {
 			var fieldName = nameRulesService.ConvertName(property.Name, UseNameRulesFor.DependencyProperty, UseNameRulesFor.DependencyField);
 
 			log.Debug($"Create field with name '{fieldName}'");
@@ -94,7 +94,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 
 			return field;
 		}
-		private void InitializeInStaticConstructor(CommonAssembly assembly, CommonType frameworkElementType, CommonProperty property, FieldReference field) {
+		private void InitializeInStaticConstructor(ICommonAssembly assembly, ICommonType frameworkElementType, ICommonProperty property, FieldReference field) {
 			var staticConstructor = frameworkElementType.MonoCecil.GetStaticConstructor();
 			if (staticConstructor == null) {
 				staticConstructor = new MethodDefinition(".cctor", MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.Static, assembly.MonoCecil.MainModule.TypeSystem.Void);
@@ -111,7 +111,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 			staticConstructor.Body.Instructions.Insert(6, Instruction.Create(OpCodes.Stsfld, field));
 		}
 
-		private void GenerateGetMethodBody(CommonAssembly assembly, CommonType frameworkElementType, PropertyDefinition property, FieldReference field) {
+		private void GenerateGetMethodBody(ICommonAssembly assembly, ICommonType frameworkElementType, PropertyDefinition property, FieldReference field) {
 			log.Info("Generate get method body...");
 
 			if (property.GetMethod == null) {
@@ -135,7 +135,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.FrameworkElementPa
 
 			log.Info("Get method body was generated");
 		}
-		private void GenerateSetMethodBody(CommonAssembly assembly, CommonType frameworkElementType, PropertyDefinition property, FieldReference field) {
+		private void GenerateSetMethodBody(ICommonAssembly assembly, ICommonType frameworkElementType, PropertyDefinition property, FieldReference field) {
 			log.Info("Generate set method body...");
 
 			if (property.SetMethod == null) {

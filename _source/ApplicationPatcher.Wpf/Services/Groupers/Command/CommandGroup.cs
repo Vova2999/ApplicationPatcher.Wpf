@@ -1,13 +1,13 @@
-﻿using ApplicationPatcher.Core.Types.CommonMembers;
+﻿using ApplicationPatcher.Core.Types.CommonInterfaces;
 
 namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 	public class CommandGroup {
-		public readonly CommonField CommandField;
-		public readonly CommonProperty CommandProperty;
-		public readonly CommonMethod CommandExecuteMethod;
-		public readonly CommonMethod CommandCanExecuteMethod;
+		public readonly ICommonField CommandField;
+		public readonly ICommonProperty CommandProperty;
+		public readonly ICommonMethod CommandExecuteMethod;
+		public readonly ICommonMethod CommandCanExecuteMethod;
 
-		public CommandGroup(CommonField commandField, CommonProperty commandProperty, CommonMethod commandExecuteMethod, CommonMethod commandCanExecuteMethod) {
+		public CommandGroup(ICommonField commandField, ICommonProperty commandProperty, ICommonMethod commandExecuteMethod, ICommonMethod commandCanExecuteMethod) {
 			CommandField = commandField;
 			CommandProperty = commandProperty;
 			CommandExecuteMethod = commandExecuteMethod;

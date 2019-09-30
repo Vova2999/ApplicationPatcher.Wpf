@@ -3,8 +3,6 @@ using System.Linq;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Wpf.Services;
 
-// ReSharper disable MemberCanBePrivate.Global
-
 namespace ApplicationPatcher.Wpf.Exceptions {
 	public class ViewModelPropertyPatchingException : Exception {
 		public ViewModelPropertyPatchingException(string message) : base($"Internal errors of view model property patching:\n{message}") {

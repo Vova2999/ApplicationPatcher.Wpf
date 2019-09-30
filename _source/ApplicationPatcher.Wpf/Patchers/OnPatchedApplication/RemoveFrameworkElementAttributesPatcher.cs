@@ -3,7 +3,7 @@ using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using ApplicationPatcher.Wpf.Types.Attributes.FrameworkElement;
@@ -19,7 +19,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Remove framework element attributes...");
 
 			RemoveAttributesFromFrameworkElements(assembly);
@@ -28,11 +28,11 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			return PatchResult.Continue;
 		}
 
-		private static void RemoveAttributesFromFrameworkElements(CommonAssembly assembly) {
+		private static void RemoveAttributesFromFrameworkElements(ICommonAssembly assembly) {
 			var frameworkElementBaseType = assembly.GetCommonType(KnownTypeNames.FrameworkElement, true);
 			var frameworkElementTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(frameworkElementBaseType).ToArray();
 
-			foreach (var frameworkElementType in frameworkElementTypes) {
+			foreach (var frameworkElementType in frameworkElementTypes.Select(type => type.Load())) {
 				frameworkElementType.MonoCecil.RemoveAttributes<PatchingFrameworkElementAttribute>();
 				frameworkElementType.MonoCecil.RemoveAttributes<NotPatchingFrameworkElementAttribute>();
 

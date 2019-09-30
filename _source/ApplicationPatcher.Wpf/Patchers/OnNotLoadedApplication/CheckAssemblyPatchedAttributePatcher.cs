@@ -2,7 +2,7 @@
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using JetBrains.Annotations;
 
@@ -15,10 +15,10 @@ namespace ApplicationPatcher.Wpf.Patchers.OnNotLoadedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Check assembly patched attribute...");
 
-			if (assembly.ContainsAttribute<AssemblyPatchedAttribute>()) {
+			if (assembly.ContainsReflectionAttribute<AssemblyPatchedAttribute>()) {
 				log.Info("Assembly patched attribute found");
 				return PatchResult.Cancel;
 			}

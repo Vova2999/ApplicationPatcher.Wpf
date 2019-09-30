@@ -1,7 +1,7 @@
 ﻿using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using JetBrains.Annotations;
@@ -15,7 +15,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Remove assembly attributes...");
 
 			RemoveAttributesFromAssembly(assembly);
@@ -24,7 +24,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			return PatchResult.Continue;
 		}
 
-		private static void RemoveAttributesFromAssembly(CommonAssembly assembly) {
+		private static void RemoveAttributesFromAssembly(ICommonAssembly assembly) {
 			assembly.MonoCecil.RemoveAttributes<SelectingViewModelAttribute>();
 			assembly.MonoCecil.RemoveAttributes<SelectingFrameworkElementAttribute>();
 		}

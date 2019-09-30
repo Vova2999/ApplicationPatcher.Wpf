@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Helpers;
 using ApplicationPatcher.Wpf.Services.Groupers.Command;
@@ -22,25 +22,25 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 		private readonly NameRulesService nameRulesService;
 		private readonly ILog log;
 
-		private readonly ExtendedLazy<CommonAssembly, CommonType> commandType =
-			new ExtendedLazy<CommonAssembly, CommonType>(assembly => assembly.GetCommonType(KnownTypeNames.ICommand, true));
+		private readonly ExtendedLazy<ICommonAssembly, ICommonType> commandType =
+			new ExtendedLazy<ICommonAssembly, ICommonType>(assembly => assembly.GetCommonType(KnownTypeNames.ICommand, true));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> actionConstructor =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Action), true).GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> actionConstructor =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Action), true).Load().GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> funcBoolConstructor =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => {
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> funcBoolConstructor =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => {
 				var funcType = assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Func<>), true).MonoCecil);
 				var genericFuncType = funcType.MakeGenericInstanceType(assembly.MonoCecil.MainModule.TypeSystem.Boolean);
 				var funcConstructor = genericFuncType.Resolve().Methods.First(method => method.Parameters.Select(parameter => parameter.ParameterType.FullName).SequenceEqual(new[] { typeof(object).FullName, typeof(IntPtr).FullName }));
 				return assembly.MonoCecil.MainModule.ImportReference(funcConstructor).MakeHostInstanceGeneric(assembly.MonoCecil.MainModule.TypeSystem.Boolean);
 			});
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> relayCommandConstructor =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).GetConstructor(new[] { typeof(Action), typeof(bool) }, true).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> relayCommandConstructor =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).Load().GetConstructor(new[] { typeof(Action), typeof(bool) }, true).MonoCecil));
 
-		private readonly ExtendedLazy<CommonAssembly, MethodReference> relayCommandConstructorWithCanExecuteMethod =
-			new ExtendedLazy<CommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).GetConstructor(new[] { typeof(Action), typeof(Func<bool>), typeof(bool) }, true).MonoCecil));
+		private readonly ExtendedLazy<ICommonAssembly, MethodReference> relayCommandConstructorWithCanExecuteMethod =
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).Load().GetConstructor(new[] { typeof(Action), typeof(Func<bool>), typeof(bool) }, true).MonoCecil));
 
 		public ViewModelCommandGroupsPatcher(CommandGrouperService commandGrouperService, NameRulesService nameRulesService) {
 			this.commandGrouperService = commandGrouperService;
@@ -48,7 +48,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType, ViewModelPatchingType patchingType) {
+		public override PatchResult Patch(ICommonAssembly assembly, ICommonType viewModelBaseType, ICommonType viewModelType, ViewModelPatchingType patchingType) {
 			log.Info("Patching command groups...");
 
 			var commandGroups = commandGrouperService.GetGroups(assembly, viewModelType, patchingType);
@@ -80,7 +80,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 		}
 
 		[AddLogOffset]
-		private void PatchGroup(CommonAssembly assembly, CommonType viewModelType, CommandGroup group) {
+		private void PatchGroup(ICommonAssembly assembly, ICommonType viewModelType, CommandGroup group) {
 			var property = group.CommandProperty?.MonoCecil ?? CreateProperty(assembly, viewModelType, group.CommandExecuteMethod.Name);
 			RemoveDefaultField(viewModelType, property.Name);
 
@@ -90,7 +90,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			GenerateGetMethodBody(assembly, viewModelType, group.CommandExecuteMethod, group.CommandCanExecuteMethod, property, field);
 		}
 
-		private PropertyDefinition CreateProperty(CommonAssembly assembly, CommonType viewModelType, string executeMethodName) {
+		private PropertyDefinition CreateProperty(ICommonAssembly assembly, ICommonType viewModelType, string executeMethodName) {
 			var propertyName = nameRulesService.ConvertName(executeMethodName, UseNameRulesFor.CommandExecuteMethod, UseNameRulesFor.CommandProperty);
 
 			log.Debug($"Create property with name '{propertyName}'");
@@ -99,7 +99,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 
 			return property;
 		}
-		private void RemoveDefaultField(CommonType viewModelType, string propertyName) {
+		private void RemoveDefaultField(ICommonType viewModelType, string propertyName) {
 			var defaultFieldName = $"<{propertyName}>k__BackingField";
 			if (!viewModelType.TryGetField(defaultFieldName, out var defaultField))
 				return;
@@ -108,7 +108,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			viewModelType.MonoCecil.Fields.Remove(defaultField.MonoCecil);
 		}
 
-		private FieldDefinition CreateField(CommonType viewModelType, PropertyReference property) {
+		private FieldDefinition CreateField(ICommonType viewModelType, PropertyReference property) {
 			var fieldName = nameRulesService.ConvertName(property.Name, UseNameRulesFor.CommandProperty, UseNameRulesFor.CommandField);
 
 			log.Debug($"Create field with name '{fieldName}'");
@@ -118,7 +118,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			return field;
 		}
 
-		private void RemoveSetMethod(CommonType viewModelType, PropertyDefinition property) {
+		private void RemoveSetMethod(ICommonType viewModelType, PropertyDefinition property) {
 			if (property.SetMethod == null)
 				return;
 
@@ -126,7 +126,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			viewModelType.MonoCecil.Methods.Remove(property.SetMethod);
 			property.SetMethod = null;
 		}
-		private void GenerateGetMethodBody(CommonAssembly assembly, CommonType viewModelType, CommonMethod executeMethod, CommonMethod canExecuteMethod, PropertyDefinition property, FieldReference field) {
+		private void GenerateGetMethodBody(ICommonAssembly assembly, ICommonType viewModelType, ICommonMethod executeMethod, ICommonMethod canExecuteMethod, PropertyDefinition property, FieldReference field) {
 			log.Info("Generate get method body...");
 
 			if (property.GetMethod == null) {

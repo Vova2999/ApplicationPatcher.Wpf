@@ -2,7 +2,7 @@
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Types.Attributes;
 using JetBrains.Annotations;
 using Mono.Cecil;
@@ -16,17 +16,15 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Add assembly patched attribute...");
 
-			if (!assembly.NotContainsAttribute<AssemblyPatchedAttribute>()) {
+			if (!assembly.NotContainsReflectionAttribute<AssemblyPatchedAttribute>()) {
 				log.Info("Assembly patched attribute already exists");
 				return PatchResult.Continue;
 			}
 
-			var assemblyPatchedAttributeType = assembly.GetCommonType(typeof(AssemblyPatchedAttribute), true);
-			var assemblyPatchedAttributeConstructor = assemblyPatchedAttributeType.GetConstructor(true);
-
+			var assemblyPatchedAttributeConstructor = assembly.GetCommonType(typeof(AssemblyPatchedAttribute), true).Load().GetConstructor(true);
 			assembly.MonoCecil.CustomAttributes.Add(new CustomAttribute(assembly.MonoCecil.MainModule.ImportReference(assemblyPatchedAttributeConstructor.MonoCecil)));
 
 			log.Info("Assembly patched attribute was added");

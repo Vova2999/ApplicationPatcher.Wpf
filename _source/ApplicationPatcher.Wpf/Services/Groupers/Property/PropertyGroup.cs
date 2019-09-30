@@ -1,21 +1,21 @@
-﻿using ApplicationPatcher.Core.Types.CommonMembers;
+﻿using ApplicationPatcher.Core.Types.CommonInterfaces;
 
 namespace ApplicationPatcher.Wpf.Services.Groupers.Property {
 	public class PropertyGroup {
-		public readonly CommonField Field;
-		public readonly CommonProperty Property;
+		public readonly ICommonField Field;
+		public readonly ICommonProperty Property;
 
-		public readonly CommonMethod CalledMethodBeforeGetProperty;
-		public readonly CommonMethod CalledMethodBeforeSetProperty;
-		public readonly CommonMethod CalledMethodAfterSuccessSetProperty;
-		public readonly CommonMethod CalledMethodAfterSetProperty;
+		public readonly ICommonMethod CalledMethodBeforeGetProperty;
+		public readonly ICommonMethod CalledMethodBeforeSetProperty;
+		public readonly ICommonMethod CalledMethodAfterSuccessSetProperty;
+		public readonly ICommonMethod CalledMethodAfterSetProperty;
 
-		public PropertyGroup(CommonField field,
-							 CommonProperty property,
-							 CommonMethod calledMethodBeforeGetProperty,
-							 CommonMethod calledMethodBeforeSetProperty,
-							 CommonMethod calledMethodAfterSuccessSetProperty,
-							 CommonMethod calledMethodAfterSetProperty) {
+		public PropertyGroup(ICommonField field,
+							 ICommonProperty property,
+							 ICommonMethod calledMethodBeforeGetProperty,
+							 ICommonMethod calledMethodBeforeSetProperty,
+							 ICommonMethod calledMethodAfterSuccessSetProperty,
+							 ICommonMethod calledMethodAfterSetProperty) {
 			Field = field;
 			Property = property;
 			CalledMethodBeforeGetProperty = calledMethodBeforeGetProperty;

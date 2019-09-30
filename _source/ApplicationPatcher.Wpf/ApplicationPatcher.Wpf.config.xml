@@ -10,7 +10,7 @@
 	<CommandExecuteMethodNameRules Prefix="Execute" Suffix="Method" Type="UpperCamelCase" />
 	<CommandCanExecuteMethodNameRules Prefix="CanExecute" Suffix="Method" Type="UpperCamelCase" />
 	<SkipConnectingByNameIfNameIsInvalid>false</SkipConnectingByNameIfNameIsInvalid>
-	<ConnectByNameIfExsistConnectAttribute>false</ConnectByNameIfExsistConnectAttribute>
+	<ConnectByNameIfExistConnectAttribute>false</ConnectByNameIfExistConnectAttribute>
 	<DefaultViewModelPatchingType>All</DefaultViewModelPatchingType>
 	<DefaultViewModelSelectingType>All</DefaultViewModelSelectingType>
 	<DefaultFrameworkElementPatchingType>All</DefaultFrameworkElementPatchingType>

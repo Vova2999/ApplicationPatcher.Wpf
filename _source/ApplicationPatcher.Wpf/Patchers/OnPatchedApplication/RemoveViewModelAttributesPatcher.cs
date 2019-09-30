@@ -3,7 +3,7 @@ using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Types.Attributes.Connect;
 using ApplicationPatcher.Wpf.Types.Attributes.SelectPatching;
@@ -19,7 +19,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly) {
+		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Remove view model attributes...");
 
 			RemoveAttributesFromViewModels(assembly);
@@ -28,11 +28,11 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 			return PatchResult.Continue;
 		}
 
-		private static void RemoveAttributesFromViewModels(CommonAssembly assembly) {
+		private static void RemoveAttributesFromViewModels(ICommonAssembly assembly) {
 			var viewModelBaseType = assembly.GetCommonType(KnownTypeNames.ViewModelBase);
 			var viewModelTypes = assembly.GetInheritanceCommonTypesFromThisAssembly(viewModelBaseType).ToArray();
 
-			foreach (var viewModelType in viewModelTypes) {
+			foreach (var viewModelType in viewModelTypes.Select(type => type.Load())) {
 				viewModelType.MonoCecil.RemoveAttributes<PatchingViewModelAttribute>();
 				viewModelType.MonoCecil.RemoveAttributes<NotPatchingViewModelAttribute>();
 

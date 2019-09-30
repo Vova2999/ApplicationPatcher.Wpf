@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
-using ApplicationPatcher.Core.Types.CommonMembers;
-using ApplicationPatcher.Core.Types.Interfaces;
+using ApplicationPatcher.Core.Types.BaseInterfaces;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Wpf.Extensions;
 using ApplicationPatcher.Wpf.Services.Groupers.Property;
 using ApplicationPatcher.Wpf.Services.NameRules;
@@ -27,7 +27,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			log = Log.For(this);
 		}
 
-		public override PatchResult Patch(CommonAssembly assembly, CommonType viewModelBaseType, CommonType viewModelType, ViewModelPatchingType patchingType) {
+		public override PatchResult Patch(ICommonAssembly assembly, ICommonType viewModelBaseType, ICommonType viewModelType, ViewModelPatchingType patchingType) {
 			log.Info("Patching property groups...");
 
 			var propertyGroups = propertyGrouperService.GetGroups(assembly, viewModelType, patchingType);
@@ -49,7 +49,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 		}
 
 		[AddLogOffset]
-		private void PatchGroup(CommonAssembly assembly, IHasMethods viewModelBaseType, CommonType viewModelType, PropertyGroup group) {
+		private void PatchGroup(ICommonAssembly assembly, IHasMethods viewModelBaseType, ICommonType viewModelType, PropertyGroup group) {
 			RemoveDefaultField(viewModelType, group.Property.Name);
 
 			var field = group.Field?.MonoCecil ?? CreateField(viewModelType, group.Property);
@@ -58,7 +58,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			GenerateSetMethodBody(assembly, viewModelBaseType, viewModelType, group, field);
 		}
 
-		private void RemoveDefaultField(CommonType viewModelType, string propertyName) {
+		private void RemoveDefaultField(ICommonType viewModelType, string propertyName) {
 			var defaultFieldName = $"<{propertyName}>k__BackingField";
 			if (!viewModelType.TryGetField(defaultFieldName, out var defaultField))
 				return;
@@ -67,7 +67,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			viewModelType.MonoCecil.Fields.Remove(defaultField.MonoCecil);
 		}
 
-		private FieldDefinition CreateField(CommonType viewModelType, CommonProperty property) {
+		private FieldDefinition CreateField(ICommonType viewModelType, ICommonProperty property) {
 			var fieldName = nameRulesService.ConvertName(property.Name, UseNameRulesFor.Property, UseNameRulesFor.Field);
 
 			log.Debug($"Create field with name '{fieldName}'");
@@ -77,7 +77,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			return field;
 		}
 
-		private void GenerateGetMethodBody(CommonType viewModelType, PropertyGroup group, FieldReference field) {
+		private void GenerateGetMethodBody(ICommonType viewModelType, PropertyGroup group, FieldReference field) {
 			log.Info("Generate get method body...");
 
 			var property = group.Property;
@@ -100,7 +100,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 
 			log.Info("Get method body was generated");
 		}
-		private void GenerateSetMethodBody(CommonAssembly assembly, IHasMethods viewModelBaseType, CommonType viewModelType, PropertyGroup group, FieldReference field) {
+		private void GenerateSetMethodBody(ICommonAssembly assembly, IHasMethods viewModelBaseType, ICommonType viewModelType, PropertyGroup group, FieldReference field) {
 			log.Info("Generate set method body...");
 
 			var property = group.Property;
@@ -148,7 +148,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 
 			log.Info("Set method body was generated");
 		}
-		private static IEnumerable<Instruction> CreateCallMethodInstructions(CommonMethod calledMethod) {
+		private static IEnumerable<Instruction> CreateCallMethodInstructions(ICommonMethod calledMethod) {
 			if (calledMethod == null)
 				yield break;
 

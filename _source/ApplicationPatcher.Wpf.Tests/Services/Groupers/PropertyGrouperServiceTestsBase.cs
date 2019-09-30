@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ApplicationPatcher.Core.Extensions;
-using ApplicationPatcher.Core.Types.CommonMembers;
+using ApplicationPatcher.Core.Types.CommonInterfaces;
 using ApplicationPatcher.Tests;
 using ApplicationPatcher.Wpf.Configurations;
 using ApplicationPatcher.Wpf.Exceptions;
@@ -18,7 +18,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 		private FakeCommonAssemblyBuilder fakeCommonAssemblyBuilder;
 		private PropertyGrouperService propertyGrouperService;
 
-		protected CommonType CommandType;
+		protected ICommonType CommandType;
 
 		[OneTimeSetUp]
 		public void OneTimeSetUp() {
@@ -40,13 +40,17 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 			FakeCommonTypeBuilder.ClearCreatedTypes();
 		}
 
-		protected void CheckValidViewModel(CommonType viewModelType,
+		protected void CheckValidViewModel(ICommonType viewModelType, ViewModelPatchingType viewModelPatchingType, params (string PropertyName, string FieldName)[] expectedGroups) {
+			CheckValidViewModel(viewModelType, viewModelPatchingType, false, false, expectedGroups);
+		}
+
+		protected void CheckValidViewModel(ICommonType viewModelType,
 										   ViewModelPatchingType viewModelPatchingType,
 										   bool skipConnectingByNameIfNameIsInvalid,
-										   bool connectByNameIfExsistConnectAttribute,
+										   bool connectByNameIfExistConnectAttribute,
 										   params (string PropertyName, string FieldName)[] expectedGroups) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExistConnectAttribute;
 			var groups = propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
 
 			if (groups.Any())
@@ -73,13 +77,17 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers {
 				actualName.Should().Be(expectedName);
 		}
 
-		protected void CheckInvalidViewModel(CommonType viewModelType,
+		protected void CheckInvalidViewModel(ICommonType viewModelType, ViewModelPatchingType viewModelPatchingType, string errorMessage) {
+			CheckInvalidViewModel(viewModelType, viewModelPatchingType, errorMessage, false, false);
+		}
+
+		protected void CheckInvalidViewModel(ICommonType viewModelType,
 											 ViewModelPatchingType viewModelPatchingType,
 											 string errorMessage,
-											 bool skipConnectingByNameIfNameIsInvalid = false,
-											 bool connectByNameIfExsistConnectAttribute = false) {
+											 bool skipConnectingByNameIfNameIsInvalid,
+											 bool connectByNameIfExistConnectAttribute) {
 			applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid = skipConnectingByNameIfNameIsInvalid;
-			applicationPatcherWpfConfiguration.ConnectByNameIfExsistConnectAttribute = connectByNameIfExsistConnectAttribute;
+			applicationPatcherWpfConfiguration.ConnectByNameIfExistConnectAttribute = connectByNameIfExistConnectAttribute;
 
 			try {
 				propertyGrouperService.GetGroups(fakeCommonAssemblyBuilder.CommonAssembly, viewModelType, viewModelPatchingType);
