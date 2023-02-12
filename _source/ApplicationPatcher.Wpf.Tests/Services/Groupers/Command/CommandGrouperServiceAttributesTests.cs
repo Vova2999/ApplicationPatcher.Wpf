@@ -9,20 +9,32 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 	[TestFixture]
 	public class CommandGrouperServiceAttributesTests : CommandGrouperServiceTestsBase {
 		[Test]
-		public void PatchingMethodCanNotHaveParameters_InvalidViewModel() {
+		public void PatchingMethodCanHaveParameters_InvalidViewModel() {
+			const string executeMethodName = "ExecuteAnyActionMethod";
+
+			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)), new FakeParameter("parameter", typeof(int)) }, new PatchingCommandAttribute())
+				.Build();
+
+			CheckInvalidViewModel(viewModelType,
+				ViewModelPatchingType.All,
+				$"Patching method '{executeMethodName}' can not have more than one parameter");
+
+			CheckInvalidViewModel(viewModelType,
+				ViewModelPatchingType.Selectively,
+				$"Patching method '{executeMethodName}' can not have more than one parameter");
+		}
+
+		[Test]
+		public void PatchingMethodCanHaveParameters_ValidViewModel() {
 			const string executeMethodName = "ExecuteAnyActionMethod";
 
 			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
 				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) }, new PatchingCommandAttribute())
 				.Build();
 
-			CheckInvalidViewModel(viewModelType,
-				ViewModelPatchingType.All,
-				$"Patching method '{executeMethodName}' can not have parameters");
-
-			CheckInvalidViewModel(viewModelType,
-				ViewModelPatchingType.Selectively,
-				$"Patching method '{executeMethodName}' can not have parameters");
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (executeMethodName, null, null, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, (executeMethodName, null, null, null));
 		}
 
 		[Test]
@@ -108,7 +120,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 		}
 
 		[Test]
-		public void PatchingMethodWithConnectMethodToMethodAttributeCanNotHaveParameters_InvalidViewModel() {
+		public void PatchingMethodWithConnectMethodToMethodAttributeCanHaveParameters_InvalidViewModel() {
 			const string executeMethodName = "ExecuteAnyActionMethod";
 			const string canExecuteMethodName = "CanExecuteAnyActionMethod";
 
@@ -124,19 +136,41 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.All,
-				$"Patching method '{executeMethodName}' can not have parameters");
+				$"Patching method '{canExecuteMethodName}' must have one parameter with type {typeof(int).FullName}, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{executeMethodName}'");
 
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.Selectively,
-				$"Patching method '{executeMethodName}' can not have parameters");
+				$"Patching method '{canExecuteMethodName}' must have one parameter with type {typeof(int).FullName}, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{executeMethodName}'");
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.All,
-				$"Patching method '{canExecuteMethodName}' can not have parameters");
+				$"Patching method '{executeMethodName}' must have one parameter with type {typeof(int).FullName}, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{canExecuteMethodName}'");
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.Selectively,
-				$"Patching method '{canExecuteMethodName}' can not have parameters");
+				$"Patching method '{executeMethodName}' must have one parameter with type {typeof(int).FullName}, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{canExecuteMethodName}'");
+		}
+
+		[Test]
+		public void PatchingMethodWithConnectMethodToMethodAttributeCanHaveParameters_ValidViewModel() {
+			const string executeMethodName = "ExecuteAnyActionMethod";
+			const string canExecuteMethodName = "CanExecuteAnyActionMethod";
+
+			var firstViewModelType = FakeCommonTypeBuilder.Create("FirstViewModel")
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) }, new ConnectMethodToMethodAttribute(canExecuteMethodName))
+				.AddMethod(canExecuteMethodName, typeof(bool), new[] { new FakeParameter("parameter", typeof(int)) })
+				.Build();
+
+			var secondViewModelType = FakeCommonTypeBuilder.Create("SecondViewModel")
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) })
+				.AddMethod(canExecuteMethodName, typeof(bool), new[] { new FakeParameter("parameter", typeof(int)) }, new ConnectMethodToMethodAttribute(executeMethodName))
+				.Build();
+
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, (executeMethodName, canExecuteMethodName, null, null));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, (executeMethodName, canExecuteMethodName, null, null));
+
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, (executeMethodName, canExecuteMethodName, null, null));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, (executeMethodName, canExecuteMethodName, null, null));
 		}
 
 		[Test]
@@ -336,7 +370,7 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 		}
 
 		[Test]
-		public void PatchingMethodSpecifiedInConnectMethodToMethodAttributeCanNotHaveParameters_InvalidViewModel() {
+		public void PatchingMethodSpecifiedInConnectMethodToMethodAttributeCanHaveParameters_InvalidViewModel() {
 			const string executeMethodName = "ExecuteAnyActionMethod";
 			const string canExecuteMethodName = "CanExecuteAnyActionMethod";
 
@@ -352,19 +386,41 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.All,
-				$"Patching method '{canExecuteMethodName}' can not have parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{executeMethodName}'");
+				$"Patching method '{canExecuteMethodName}' can not have parameter because method {executeMethodName} has no parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{executeMethodName}'");
 
 			CheckInvalidViewModel(firstViewModelType,
 				ViewModelPatchingType.Selectively,
-				$"Patching method '{canExecuteMethodName}' can not have parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{executeMethodName}'");
+				$"Patching method '{canExecuteMethodName}' can not have parameter because method {executeMethodName} has no parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{executeMethodName}'");
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.All,
-				$"Patching method '{executeMethodName}' can not have parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{canExecuteMethodName}'");
+				$"Patching method '{executeMethodName}' can not have parameter because method {canExecuteMethodName} has no parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{canExecuteMethodName}'");
 
 			CheckInvalidViewModel(secondViewModelType,
 				ViewModelPatchingType.Selectively,
-				$"Patching method '{executeMethodName}' can not have parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{canExecuteMethodName}'");
+				$"Patching method '{executeMethodName}' can not have parameter because method {canExecuteMethodName} has no parameters, connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{canExecuteMethodName}'");
+		}
+
+		[Test]
+		public void PatchingMethodSpecifiedInConnectMethodToMethodAttributeCanHaveParameters_ValidViewModel() {
+			const string executeMethodName = "ExecuteAnyActionMethod";
+			const string canExecuteMethodName = "CanExecuteAnyActionMethod";
+
+			var firstViewModelType = FakeCommonTypeBuilder.Create("FirstViewModel")
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) }, new ConnectMethodToMethodAttribute(canExecuteMethodName))
+				.AddMethod(canExecuteMethodName, typeof(bool), new[] { new FakeParameter("parameter", typeof(int)) })
+				.Build();
+
+			var secondViewModelType = FakeCommonTypeBuilder.Create("SecondViewModel")
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) })
+				.AddMethod(canExecuteMethodName, typeof(bool), new[] { new FakeParameter("parameter", typeof(int)) }, new ConnectMethodToMethodAttribute(executeMethodName))
+				.Build();
+
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.All, (executeMethodName, canExecuteMethodName, null, null));
+			CheckValidViewModel(firstViewModelType, ViewModelPatchingType.Selectively, (executeMethodName, canExecuteMethodName, null, null));
+
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.All, (executeMethodName, canExecuteMethodName, null, null));
+			CheckValidViewModel(secondViewModelType, ViewModelPatchingType.Selectively, (executeMethodName, canExecuteMethodName, null, null));
 		}
 
 		[Test]
@@ -564,7 +620,26 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 		}
 
 		[Test]
-		public void PatchingMethodWithConnectMethodToPropertyAttributeCanNotHaveParameters_InvalidViewModel() {
+		public void PatchingMethodWithConnectMethodToPropertyAttributeCanHaveParameters_InvalidViewModel() {
+			const string propertyName = "AnyActionCommand";
+			const string executeMethodName = "ExecuteAnyActionMethod";
+
+			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
+				.AddProperty(propertyName, CommandType.Type, PropertyMethods.HasGetAndSet)
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)), new FakeParameter("parameter", typeof(int)) }, new ConnectMethodToPropertyAttribute(propertyName))
+				.Build();
+
+			CheckInvalidViewModel(viewModelType,
+				ViewModelPatchingType.All,
+				$"Patching method '{executeMethodName}' can not have more than one parameter");
+
+			CheckInvalidViewModel(viewModelType,
+				ViewModelPatchingType.Selectively,
+				$"Patching method '{executeMethodName}' can not have more than one parameter");
+		}
+
+		[Test]
+		public void PatchingMethodWithConnectMethodToPropertyAttributeCanHaveParameters_ValidViewModel() {
 			const string propertyName = "AnyActionCommand";
 			const string executeMethodName = "ExecuteAnyActionMethod";
 
@@ -573,13 +648,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) }, new ConnectMethodToPropertyAttribute(propertyName))
 				.Build();
 
-			CheckInvalidViewModel(viewModelType,
-				ViewModelPatchingType.All,
-				$"Patching method '{executeMethodName}' can not have parameters");
-
-			CheckInvalidViewModel(viewModelType,
-				ViewModelPatchingType.Selectively,
-				$"Patching method '{executeMethodName}' can not have parameters");
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (executeMethodName, null, propertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, (executeMethodName, null, propertyName, null));
 		}
 
 		[Test]
@@ -856,7 +926,26 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 		}
 
 		[Test]
-		public void PatchingMethodSpecifiedInConnectPropertyToMethodAttributeCanNotHaveParameters_InvalidViewModel() {
+		public void PatchingMethodSpecifiedInConnectPropertyToMethodAttributeCanHaveParameters_InvalidViewModel() {
+			const string propertyName = "AnyActionCommand";
+			const string executeMethodName = "ExecuteAnyActionMethod";
+
+			var viewModelType = FakeCommonTypeBuilder.Create("ViewModel")
+				.AddProperty(propertyName, CommandType.Type, PropertyMethods.HasGetAndSet, new ConnectPropertyToMethodAttribute(executeMethodName))
+				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)), new FakeParameter("parameter", typeof(int)) })
+				.Build();
+
+			CheckInvalidViewModel(viewModelType,
+				ViewModelPatchingType.All,
+				$"Patching method '{executeMethodName}' can not have more than one parameter, connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{propertyName}'");
+
+			CheckInvalidViewModel(viewModelType,
+				ViewModelPatchingType.Selectively,
+				$"Patching method '{executeMethodName}' can not have more than one parameter, connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{propertyName}'");
+		}
+
+		[Test]
+		public void PatchingMethodSpecifiedInConnectPropertyToMethodAttributeCanHaveParameters_ValidViewModel() {
 			const string propertyName = "AnyActionCommand";
 			const string executeMethodName = "ExecuteAnyActionMethod";
 
@@ -865,13 +954,8 @@ namespace ApplicationPatcher.Wpf.Tests.Services.Groupers.Command {
 				.AddMethod(executeMethodName, typeof(void), new[] { new FakeParameter("parameter", typeof(int)) })
 				.Build();
 
-			CheckInvalidViewModel(viewModelType,
-				ViewModelPatchingType.All,
-				$"Patching method '{executeMethodName}' can not have parameters, connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{propertyName}'");
-
-			CheckInvalidViewModel(viewModelType,
-				ViewModelPatchingType.Selectively,
-				$"Patching method '{executeMethodName}' can not have parameters, connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{propertyName}'");
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.All, (executeMethodName, null, propertyName, null));
+			CheckValidViewModel(viewModelType, ViewModelPatchingType.Selectively, (executeMethodName, null, propertyName, null));
 		}
 
 		[Test]

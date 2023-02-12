@@ -113,8 +113,10 @@
       <DependentUpon>MyUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Integration\FrameworkElements\MyUserControlTests.cs" />
+    <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithCanExecuteAndParameterCommands.cs" />
     <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithCanExecuteMethod.cs" />
     <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithNotPatchingViewModel.cs" />
+    <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithParameterCommands.cs" />
     <Compile Include="Integration\ViewModels\Commands\ViewModelCommandsTestsWithSimpleCommands.cs" />
     <Compile Include="Integration\ViewModels\Properties\ViewModelPropertiesTestsWithCalledMethods.cs" />
     <Compile Include="Integration\ViewModels\Properties\ViewModelPropertiesTestsWithFields.cs" />

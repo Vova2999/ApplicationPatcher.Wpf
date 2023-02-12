@@ -291,13 +291,13 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 
 				if (viewModelType.TryGetProperty(propertyName, out var property))
 					patchingCommandGroups.GetOrAdd(group => group.ExecuteMethod == method, () => CreateEmptyPatchingCommandGroup(method)).Properties.AddIfNotContains(property);
-				if (viewModelType.TryGetMethod(canExecuteMethodName, method.ParameterTypes, out var canExecuteMethod))
+				foreach (var canExecuteMethod in viewModelType.GetMethods(canExecuteMethodName))
 					patchingCommandGroups.GetOrAdd(group => group.ExecuteMethod == method, () => CreateEmptyPatchingCommandGroup(method)).CanExecuteMethods.AddIfNotContains(canExecuteMethod);
 			}
 		}
 		private static void AddGroupsFromConnectMethodToMethodAttribute(ICollection<(ICommonMethod ExecuteMethod, List<ICommonMethod> CanExecuteMethods, List<ICommonProperty> Properties, List<ICommonField> Fields)> patchingCommandGroups, IHasMethods viewModelType) {
 			foreach (var method in viewModelType.Methods) {
-				foreach (var connectedMethod in method.GetCastedAttributes<ConnectMethodToMethodAttribute>().Select(attribute => viewModelType.GetMethod(attribute.ConnectingMethodName, true))) {
+				foreach (var connectedMethod in method.GetCastedAttributes<ConnectMethodToMethodAttribute>().SelectMany(attribute => viewModelType.GetMethods(attribute.ConnectingMethodName))) {
 					var executeMethod = method.ReturnType == typeof(void) ? method : connectedMethod.ReturnType == typeof(void) ? connectedMethod : throw new Exception();
 					var canExecuteMethod = method.ReturnType == typeof(bool) ? method : connectedMethod.ReturnType == typeof(bool) ? connectedMethod : throw new Exception();
 					patchingCommandGroups.GetOrAdd(group => group.ExecuteMethod == executeMethod, () => CreateEmptyPatchingCommandGroup(executeMethod)).CanExecuteMethods.AddIfNotContains(canExecuteMethod);
@@ -312,7 +312,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 		}
 		private static void AddGroupsFromConnectPropertyToMethodAttribute(ICollection<(ICommonMethod ExecuteMethod, List<ICommonMethod> CanExecuteMethods, List<ICommonProperty> Properties, List<ICommonField> Fields)> patchingCommandGroups, ICommonType viewModelType) {
 			foreach (var property in viewModelType.Properties) {
-				foreach (var methods in property.GetCastedAttributes<ConnectPropertyToMethodAttribute>().Select(attribute => attribute.ConnectingMethodNames.Select(name => viewModelType.GetMethod(name, true)).ToArray())) {
+				foreach (var methods in property.GetCastedAttributes<ConnectPropertyToMethodAttribute>().Select(attribute => attribute.ConnectingMethodNames.SelectMany(viewModelType.GetMethods).ToArray())) {
 					var executeMethod = methods.First(method => method.ReturnType == typeof(void));
 					var canExecuteMethod = methods.FirstOrDefault(method => method.ReturnType == typeof(bool));
 
