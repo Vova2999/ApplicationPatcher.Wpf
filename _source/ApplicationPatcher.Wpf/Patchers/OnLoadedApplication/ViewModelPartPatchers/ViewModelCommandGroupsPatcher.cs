@@ -26,21 +26,16 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			new ExtendedLazy<ICommonAssembly, ICommonType>(assembly => assembly.GetCommonType(KnownTypeNames.ICommand, true));
 
 		private readonly ExtendedLazy<ICommonAssembly, MethodReference> actionConstructor =
-			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Action), true).Load().GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil));
+			new ExtendedLazy<ICommonAssembly, MethodReference>(GetActionConstructor);
 
 		private readonly ExtendedLazy<ICommonAssembly, MethodReference> funcBoolConstructor =
-			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => {
-				var funcType = assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Func<>), true).MonoCecil);
-				var genericFuncType = funcType.MakeGenericInstanceType(assembly.MonoCecil.MainModule.TypeSystem.Boolean);
-				var funcConstructor = genericFuncType.Resolve().Methods.First(method => method.Parameters.Select(parameter => parameter.ParameterType.FullName).SequenceEqual(new[] { typeof(object).FullName, typeof(IntPtr).FullName }));
-				return assembly.MonoCecil.MainModule.ImportReference(funcConstructor).MakeHostInstanceGeneric(assembly.MonoCecil.MainModule.TypeSystem.Boolean);
-			});
+			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => GetFuncConstructor(assembly, assembly.MonoCecil.MainModule.TypeSystem.Boolean));
 
 		private readonly ExtendedLazy<ICommonAssembly, MethodReference> relayCommandConstructor =
-			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).Load().GetConstructor(new[] { typeof(Action), typeof(bool) }, true).MonoCecil));
+			new ExtendedLazy<ICommonAssembly, MethodReference>(GetRelayCommandConstructor);
 
 		private readonly ExtendedLazy<ICommonAssembly, MethodReference> relayCommandConstructorWithCanExecuteMethod =
-			new ExtendedLazy<ICommonAssembly, MethodReference>(assembly => assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).Load().GetConstructor(new[] { typeof(Action), typeof(Func<bool>), typeof(bool) }, true).MonoCecil));
+			new ExtendedLazy<ICommonAssembly, MethodReference>(GetRelayCommandConstructorWithCanExecuteMethod);
 
 		public ViewModelCommandGroupsPatcher(CommandGrouperService commandGrouperService, NameRulesService nameRulesService) {
 			this.commandGrouperService = commandGrouperService;
@@ -152,18 +147,32 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
 			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
 			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldftn, executeMethod.MonoCecil));
-			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Newobj, actionConstructor.GetValue(assembly)));
+
+			property.GetMethod.Body.Instructions.Add(executeMethod.ParameterTypes.Any()
+				? Instruction.Create(OpCodes.Newobj, GetActionConstructor(assembly, executeMethod.MonoCecil.Parameters.Single().ParameterType))
+				: Instruction.Create(OpCodes.Newobj, actionConstructor.GetValue(assembly)));
 
 			if (canExecuteMethod == null) {
 				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Newobj, relayCommandConstructor.GetValue(assembly)));
+				property.GetMethod.Body.Instructions.Add(executeMethod.ParameterTypes.Any()
+					? Instruction.Create(OpCodes.Newobj, GetRelayCommandConstructor(assembly, executeMethod.MonoCecil.Parameters.Single().ParameterType))
+					: Instruction.Create(OpCodes.Newobj, relayCommandConstructor.GetValue(assembly)));
 			}
 			else {
 				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
 				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldftn, canExecuteMethod.MonoCecil));
-				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Newobj, funcBoolConstructor.GetValue(assembly)));
+
+				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Newobj,
+					executeMethod.ParameterTypes.Any()
+						? GetFuncConstructor(assembly, executeMethod.MonoCecil.Parameters.Single().ParameterType, assembly.MonoCecil.MainModule.TypeSystem.Boolean)
+						: funcBoolConstructor.GetValue(assembly)));
+
 				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Newobj, relayCommandConstructorWithCanExecuteMethod.GetValue(assembly)));
+
+				property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Newobj,
+					executeMethod.ParameterTypes.Any()
+						? GetRelayCommandConstructorWithCanExecuteMethod(assembly, executeMethod.MonoCecil.Parameters.Single().ParameterType)
+						: relayCommandConstructorWithCanExecuteMethod.GetValue(assembly)));
 			}
 
 			property.GetMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Dup));
@@ -175,6 +184,43 @@ namespace ApplicationPatcher.Wpf.Patchers.OnLoadedApplication.ViewModelPartPatch
 			property.GetMethod.RemoveAttributes<CompilerGeneratedAttribute>();
 
 			log.Info("Get method body was generated");
+		}
+
+		private static MethodReference GetActionConstructor(ICommonAssembly assembly) {
+			return assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(typeof(Action), true).Load().GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil);
+		}
+
+		private static MethodReference GetActionConstructor(ICommonAssembly assembly, TypeReference returnType) {
+			var actionConstructor = assembly.GetCommonType(typeof(Action<>), true).Load().GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil;
+			return assembly.MonoCecil.MainModule.ImportReference(actionConstructor.MakeHostInstanceGeneric(returnType));
+		}
+
+		private static MethodReference GetFuncConstructor(ICommonAssembly assembly, TypeReference returnType) {
+			var funcConstructor = assembly.GetCommonType(typeof(Func<>), true).Load().GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil;
+			return assembly.MonoCecil.MainModule.ImportReference(funcConstructor.MakeHostInstanceGeneric(returnType));
+		}
+
+		private static MethodReference GetFuncConstructor(ICommonAssembly assembly, TypeReference parameterType, TypeReference returnType) {
+			var funcConstructor = assembly.GetCommonType(typeof(Func<,>), true).Load().GetConstructor(new[] { typeof(object), typeof(IntPtr) }, true).MonoCecil;
+			return assembly.MonoCecil.MainModule.ImportReference(funcConstructor.MakeHostInstanceGeneric(parameterType, returnType));
+		}
+
+		private static MethodReference GetRelayCommandConstructor(ICommonAssembly assembly) {
+			return assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).Load().GetConstructor(new[] { typeof(Action), typeof(bool) }, true).MonoCecil);
+		}
+
+		private static MethodReference GetRelayCommandConstructor(ICommonAssembly assembly, TypeReference parameterType) {
+			var relayCommandConstructor = assembly.GetCommonType(KnownTypeNames.RelayCommandT, true).Load().GetConstructor(new[] { typeof(Action<>).Name, typeof(bool).FullName }, true).MonoCecil;
+			return assembly.MonoCecil.MainModule.ImportReference(relayCommandConstructor.MakeHostInstanceGeneric(parameterType));
+		}
+
+		private static MethodReference GetRelayCommandConstructorWithCanExecuteMethod(ICommonAssembly assembly) {
+			return assembly.MonoCecil.MainModule.ImportReference(assembly.GetCommonType(KnownTypeNames.RelayCommand, true).Load().GetConstructor(new[] { typeof(Action), typeof(Func<bool>), typeof(bool) }, true).MonoCecil);
+		}
+
+		private static MethodReference GetRelayCommandConstructorWithCanExecuteMethod(ICommonAssembly assembly, TypeReference parameterType) {
+			var funcConstructor = assembly.GetCommonType(KnownTypeNames.RelayCommandT, true).Load().GetConstructor(new[] { typeof(Action<>).Name, typeof(Func<,>).Name, typeof(bool).FullName }, true).MonoCecil;
+			return assembly.MonoCecil.MainModule.ImportReference(funcConstructor.MakeHostInstanceGeneric(parameterType));
 		}
 	}
 }

@@ -39,8 +39,8 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 			var errorsService = new ErrorsService();
 			foreach (var method in viewModelType.Methods) {
 				if (method.ContainsAttribute<PatchingCommandAttribute>()) {
-					if (method.ParameterTypes.Any())
-						errorsService.AddError($"Patching method '{method.Name}' can not have parameters");
+					if (method.ParameterTypes.Length > 1)
+						errorsService.AddError($"Patching method '{method.Name}' can not have more than one parameter");
 
 					if (method.ContainsAttribute<NotPatchingCommandAttribute>())
 						errorsService.AddError($"Patching method '{method.Name}' can not have " +
@@ -52,8 +52,8 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 				}
 
 				foreach (var attribute in method.GetCastedAttributes<ConnectMethodToMethodAttribute>()) {
-					if (method.ParameterTypes.Any())
-						errorsService.AddError($"Patching method '{method.Name}' can not have parameters");
+					if (method.ParameterTypes.Length > 1)
+						errorsService.AddError($"Patching method '{method.Name}' can not have more than one parameter");
 
 					if (method.ContainsAttribute<NotPatchingCommandAttribute>())
 						errorsService.AddError($"Patching method '{method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'");
@@ -72,12 +72,20 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 						case 1:
 							var singleMethod = methods.Single();
 
-							if (singleMethod.ParameterTypes.Any())
-								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have parameters, " +
+							if (singleMethod.ParameterTypes.Length > 1)
+								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have more than one parameter, " +
 									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
 
 							if (singleMethod.ContainsAttribute<NotPatchingCommandAttribute>())
 								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have '{nameof(NotPatchingCommandAttribute)}', " +
+									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
+
+							if (!method.ParameterTypes.Any() && singleMethod.ParameterTypes.Any())
+								errorsService.AddError($"Patching method '{singleMethod.Name}' can not have parameter because method {method.Name} has no parameters, " +
+									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
+
+							if (method.ParameterTypes.Any() && !singleMethod.ParameterTypes.Any())
+								errorsService.AddError($"Patching method '{singleMethod.Name}' must have one parameter with type {method.ParameterTypes.First().FullName}, " +
 									$"connection in '{nameof(ConnectMethodToMethodAttribute)}' at method '{method.Name}'");
 
 							if (singleMethod.ReturnType != typeof(void) && singleMethod.ReturnType != typeof(bool)) {
@@ -105,8 +113,8 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 				}
 
 				foreach (var attribute in method.GetCastedAttributes<ConnectMethodToPropertyAttribute>()) {
-					if (method.ParameterTypes.Any())
-						errorsService.AddError($"Patching method '{method.Name}' can not have parameters");
+					if (method.ParameterTypes.Length > 1)
+						errorsService.AddError($"Patching method '{method.Name}' can not have more than one parameter");
 
 					if (method.ContainsAttribute<NotPatchingCommandAttribute>())
 						errorsService.AddError($"Patching method '{method.Name}' can not have '{nameof(NotPatchingCommandAttribute)}'");
@@ -159,8 +167,8 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 							case 1:
 								var singleMethod = nameToMethods.Methods.Single();
 
-								if (singleMethod.ParameterTypes.Any())
-									errorsService.AddError($"Patching method '{singleMethod.Name}' can not have parameters, " +
+								if (singleMethod.ParameterTypes.Length > 1)
+									errorsService.AddError($"Patching method '{singleMethod.Name}' can not have more than one parameter, " +
 										$"connection in '{nameof(ConnectPropertyToMethodAttribute)}' at property '{property.Name}'");
 
 								if (singleMethod.ContainsAttribute<NotPatchingCommandAttribute>())
@@ -227,7 +235,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 
 		private ICommonMethod[] GetPatchingMethods(IHasMethods viewModelType, ViewModelPatchingType patchingType) {
 			return viewModelType.Methods
-				.Where(method => method.NotContainsAttribute<NotPatchingCommandAttribute>() && method.ReturnType == typeof(void) && !method.ParameterTypes.Any() &&
+				.Where(method => method.NotContainsAttribute<NotPatchingCommandAttribute>() && method.ReturnType == typeof(void) && method.ParameterTypes.Length <= 1 &&
 					(!applicationPatcherWpfConfiguration.SkipConnectingByNameIfNameIsInvalid || nameRulesService.IsNameValid(method.Name, UseNameRulesFor.CommandExecuteMethod)) && (
 						patchingType == ViewModelPatchingType.All ||
 						method.ContainsAttribute<PatchingCommandAttribute>() ||
@@ -283,7 +291,7 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 
 				if (viewModelType.TryGetProperty(propertyName, out var property))
 					patchingCommandGroups.GetOrAdd(group => group.ExecuteMethod == method, () => CreateEmptyPatchingCommandGroup(method)).Properties.AddIfNotContains(property);
-				if (viewModelType.TryGetMethod(canExecuteMethodName, out var canExecuteMethod))
+				if (viewModelType.TryGetMethod(canExecuteMethodName, method.ParameterTypes, out var canExecuteMethod))
 					patchingCommandGroups.GetOrAdd(group => group.ExecuteMethod == method, () => CreateEmptyPatchingCommandGroup(method)).CanExecuteMethods.AddIfNotContains(canExecuteMethod);
 			}
 		}
@@ -393,8 +401,8 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 		private void CheckPatchingCommandGroups(IEnumerable<(ICommonMethod ExecuteMethod, List<ICommonMethod> CanExecuteMethods, List<ICommonProperty> Properties, List<ICommonField> Fields)> patchingCommandGroups) {
 			var errorsService = new ErrorsService();
 			foreach (var group in patchingCommandGroups) {
-				if (group.ExecuteMethod.ParameterTypes.Any())
-					errorsService.AddError($"Execute method '{group.ExecuteMethod.Name}' can not have parameters");
+				if (group.ExecuteMethod.ParameterTypes.Length > 1)
+					errorsService.AddError($"Execute method '{group.ExecuteMethod.Name}' can not have more than one parameter");
 
 				if (group.ExecuteMethod.ReturnType != typeof(void))
 					errorsService.AddError($"Execute method '{group.ExecuteMethod.Name}' can not have " +
@@ -443,12 +451,19 @@ namespace ApplicationPatcher.Wpf.Services.Groupers.Command {
 					case 1:
 						var singleCanExecuteMethod = group.CanExecuteMethods.Single();
 
-						if (singleCanExecuteMethod.ParameterTypes.Any())
-							errorsService.AddError($"Can execute method '{singleCanExecuteMethod.Name}' can not have parameters");
+						if (singleCanExecuteMethod.ParameterTypes.Length > 1)
+							errorsService.AddError($"Can execute method '{singleCanExecuteMethod.Name}' can not have more than one parameter");
 
 						if (singleCanExecuteMethod.ReturnType != typeof(bool))
 							errorsService.AddError($"Can execute method '{singleCanExecuteMethod.Name}' can not have " +
 								$"'{singleCanExecuteMethod.ReturnType.FullName}' return type, allowable types: '{typeof(bool).FullName}'");
+
+						if (!group.ExecuteMethod.ParameterTypes.Any() && singleCanExecuteMethod.ParameterTypes.Any())
+							errorsService.AddError($"Can execute method '{singleCanExecuteMethod.Name}' can not have parameter because method {group.ExecuteMethod.Name} has no parameters");
+
+						if (group.ExecuteMethod.ParameterTypes.Any() && !singleCanExecuteMethod.ParameterTypes.Any())
+							errorsService.AddError($"Patching method '{singleCanExecuteMethod.Name}' must have one parameter with type {group.ExecuteMethod.ParameterTypes.First().FullName}");
+
 						break;
 
 					default:
