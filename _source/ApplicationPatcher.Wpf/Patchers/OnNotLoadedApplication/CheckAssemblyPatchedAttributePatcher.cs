@@ -1,5 +1,6 @@
-﻿using ApplicationPatcher.Core;
-using ApplicationPatcher.Core.Extensions;
+﻿using System.Linq;
+using System.Reflection;
+using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
 using ApplicationPatcher.Core.Types.CommonInterfaces;
@@ -18,7 +19,7 @@ namespace ApplicationPatcher.Wpf.Patchers.OnNotLoadedApplication {
 		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Check assembly patched attribute...");
 
-			if (assembly.ContainsReflectionAttribute<AssemblyPatchedAttribute>()) {
+			if (assembly.Reflection.GetCustomAttributes().Any(attribute => attribute.GetType().FullName == typeof(AssemblyPatchedAttribute).FullName)) {
 				log.Info("Assembly patched attribute found");
 				return PatchResult.Cancel;
 			}

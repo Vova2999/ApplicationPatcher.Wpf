@@ -1,4 +1,5 @@
-﻿using ApplicationPatcher.Core;
+﻿using System.Linq;
+using ApplicationPatcher.Core;
 using ApplicationPatcher.Core.Extensions;
 using ApplicationPatcher.Core.Logs;
 using ApplicationPatcher.Core.Patchers;
@@ -19,12 +20,12 @@ namespace ApplicationPatcher.Wpf.Patchers.OnPatchedApplication {
 		public override PatchResult Patch(ICommonAssembly assembly) {
 			log.Info("Add assembly patched attribute...");
 
-			if (!assembly.NotContainsReflectionAttribute<AssemblyPatchedAttribute>()) {
+			if (assembly.GetAttributes(typeof(AssemblyPatchedAttribute).FullName).Any()) {
 				log.Info("Assembly patched attribute already exists");
 				return PatchResult.Continue;
 			}
 
-			var assemblyPatchedAttributeConstructor = assembly.GetCommonType(typeof(AssemblyPatchedAttribute), true).Load().GetConstructor(true);
+			var assemblyPatchedAttributeConstructor = assembly.GetCommonType(typeof(AssemblyPatchedAttribute).FullName, true).Load().GetConstructor(true);
 			assembly.MonoCecil.CustomAttributes.Add(new CustomAttribute(assembly.MonoCecil.MainModule.ImportReference(assemblyPatchedAttributeConstructor.MonoCecil)));
 
 			log.Info("Assembly patched attribute was added");
